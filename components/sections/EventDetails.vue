@@ -26,6 +26,7 @@ const venueAddress = (venue: WeddingVenue) => `${venue.address}, ${venue.city}`
           <p>Quando</p>
         </div>
         <h3>
+          <span>Sabato</span>
           <span>{{ event.date.day }} {{ event.date.month }} {{ event.date.year }}</span>
           <span>ore {{ event.date.time }}</span>
         </h3>
@@ -96,7 +97,7 @@ const venueAddress = (venue: WeddingVenue) => `${venue.address}, ${venue.city}`
 .details-card__icon {
   width: 3.25rem;
   height: 3.25rem;
-  color: var(--color-accent-deep);
+  color: var(--color-accent);
 }
 
 .details-card__icon--church,
@@ -129,11 +130,17 @@ const venueAddress = (venue: WeddingVenue) => `${venue.address}, ${venue.city}`
 }
 
 .details-card--date h3 span {
-  color: #245f38;
+  color: var(--color-ink);
   font-family: var(--font-serif);
-  font-size: 1.16em;
+  font-size: 1em;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
+}
+
+.details-card--ceremony h3,
+.details-card--reception h3 {
+  color: var(--color-ink);
+  font-weight: 600;
 }
 
 .details-card > span {

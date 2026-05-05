@@ -72,12 +72,12 @@ defineProps<{
 
 .hero__seal {
   position: absolute;
+  top: clamp(5.8rem, 11svh, 7.5rem);
   left: 50%;
-  bottom: calc(50% + clamp(4.8rem, 8.3vw, 7.7rem));
   transform: translateX(-50%);
   width: clamp(8.8rem, 16vw, 13rem);
-  opacity: 0.58;
-  filter: contrast(1.02);
+  opacity: 0.78;
+  filter: brightness(0);
 }
 
 .hero__content h1 {
@@ -92,7 +92,7 @@ defineProps<{
   align-items: baseline;
   transform: translate(-50%, -50%);
   gap: 0.03em;
-  color: var(--color-maiolica-blue);
+  color: var(--color-ink);
   font-family: var(--font-serif);
   font-size: clamp(4.3rem, 10vw, 8.5rem);
   font-weight: 600;
@@ -102,7 +102,7 @@ defineProps<{
 }
 
 .hero__amp {
-  color: color-mix(in srgb, var(--color-maiolica-blue) 42%, var(--color-paper));
+  color: var(--color-accent);
   font-weight: 400;
   opacity: 0.82;
 }
@@ -114,7 +114,7 @@ defineProps<{
   width: 100%;
   margin: 0;
   transform: translateX(-50%);
-  color: color-mix(in srgb, var(--color-maiolica-blue) 68%, #686a64);
+  color: var(--color-ink);
   font-family: var(--font-serif);
   font-size: clamp(1.8rem, 4vw, 3rem);
   font-weight: 500;
@@ -157,8 +157,8 @@ defineProps<{
   }
 
   .hero__seal {
-    bottom: calc(50% + clamp(4.2rem, 15vw, 6.2rem));
-    width: clamp(7rem, 26vw, 9.2rem);
+    top: clamp(4.6rem, 10svh, 5.6rem);
+    width: clamp(10.5rem, 39vw, 13.8rem);
   }
 
   .hero__content h1 {

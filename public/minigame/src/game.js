@@ -502,9 +502,9 @@ const BG_LAYOUT = {
   buildingsNear: [96, 296, 472],
 };
 
-function unlockAudio() {
+function unlockAudio(audible) {
   if (!A || typeof A.unlock !== 'function') return Promise.resolve(false);
-  const pending = A.unlock();
+  const pending = A.unlock(audible ? { audible: true } : undefined);
   if (pending && typeof pending.catch === 'function') {
     return pending.catch(function () { return false; });
   }
@@ -526,8 +526,10 @@ function shouldShowAudioButton() {
   if (!A || typeof A.isSupported !== 'function' || !A.isSupported()) return false;
   const isTouchLike = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 900;
   if (!isTouchLike) return false;
-  if (typeof A.getState !== 'function') return true;
-  return A.getState() !== 'running';
+  if (typeof A.getState === 'function' && A.getState() !== 'running') return true;
+  return State.running &&
+    typeof A.getCurrentTrackId === 'function' &&
+    A.getCurrentTrackId() !== State.levelIndex;
 }
 
 function updateAudioButton() {
@@ -538,12 +540,15 @@ function updateAudioButton() {
 
 function requestAudioFromGesture(event) {
   if (event) event.preventDefault();
-  unlockAudio().then(function () {
+  unlockAudio(true);
+  playSfx('coin');
+  if (State.running) ensureLevelMusic();
+  setTimeout(ensureLevelMusic, 80);
+  setTimeout(ensureLevelMusic, 240);
+  setTimeout(function () {
     if (State.running) ensureLevelMusic();
-    playSfx('coin');
     updateAudioButton();
-    setTimeout(updateAudioButton, 120);
-  });
+  }, 420);
 }
 
 function stopMusic() {

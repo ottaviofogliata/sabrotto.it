@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import WeddingSeal from '~/components/art/WeddingSeal.vue'
-import AppButton from '~/components/ui/AppButton.vue'
-import SectionLabel from '~/components/ui/SectionLabel.vue'
 import type { WeddingEvent } from '~/types/wedding'
 
 defineProps<{
@@ -10,21 +8,11 @@ defineProps<{
 </script>
 
 <template>
-  <section id="conferma" class="final-cta" aria-labelledby="final-title">
+  <section id="conferma" class="final-cta" aria-labelledby="final-quote">
     <WeddingSeal class="final-cta__seal" />
-    <p class="final-cta__quote">Just as long as you stand, stand by me &hearts;</p>
-    <SectionLabel text="Vi aspettiamo!" tone="accent" />
-    <h2 id="final-title">
-      <span>{{ event.couple.groom.firstName }}</span>
-      <em>&amp;</em>
-      <span>{{ event.couple.bride.firstName }}</span>
-    </h2>
-    <p class="final-cta__date">{{ event.date.display }} alle {{ event.date.time }}</p>
-    <AppButton
-      :label="event.rsvp.label"
-      :aria-label="event.rsvp.ariaLabel"
-      :href="event.rsvp.href"
-    />
+    <p id="final-quote" class="final-cta__quote">
+      Just as long as you stand, stand by me <span>&hearts;</span>
+    </p>
   </section>
 </template>
 
@@ -34,9 +22,10 @@ defineProps<{
   overflow: hidden;
   min-height: 100svh;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto auto auto auto auto minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto auto minmax(0, 1fr);
   justify-items: center;
-  gap: 1.4rem;
+  align-items: center;
+  gap: clamp(2.2rem, 5vw, 4rem);
   padding: clamp(5rem, 10vw, 9rem) var(--page-gutter) clamp(3rem, 7svh, 5rem);
   text-align: center;
   background:
@@ -63,60 +52,25 @@ defineProps<{
 
 .final-cta__seal {
   grid-row: 2;
-  width: clamp(6rem, 14vw, 10rem);
-  margin-bottom: 0.6rem;
+  width: clamp(9rem, 21vw, 15rem);
   opacity: 0.88;
-}
-
-.final-cta :deep(.section-label) {
-  grid-row: 4;
-}
-
-.final-cta h2 {
-  grid-row: 5;
-  margin: 0;
-  display: grid;
-  gap: 0;
-  color: var(--color-maiolica-blue);
-  font-family: var(--font-script);
-  font-size: clamp(5rem, 11vw, 10rem);
-  font-weight: 400;
-  line-height: 0.78;
-  text-shadow: 0 0.06em 0.22em rgba(255, 248, 237, 0.62);
-}
-
-.final-cta h2 em {
-  color: var(--color-accent-deep);
-  font-size: 0.36em;
-  font-style: normal;
-  line-height: 0.8;
 }
 
 .final-cta__quote {
   grid-row: 3;
-  max-width: min(38rem, 82vw);
   margin: 0;
-  color: var(--color-accent-deep);
+  color: var(--color-ink);
   font-family: var(--font-serif);
-  font-size: clamp(1.55rem, 3vw, 2.45rem);
+  font-size: clamp(2.2rem, 5vw, 4.8rem);
   font-style: italic;
-  line-height: 1.35;
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: 0;
   text-wrap: balance;
   text-shadow: 0 0.08em 0.18em rgba(255, 248, 237, 0.76);
 }
 
-.final-cta__date {
-  grid-row: 6;
-  margin: 0 0 1.2rem;
-  color: var(--color-maiolica-blue);
-  font-family: var(--font-sans);
-  font-size: clamp(1rem, 1.6vw, 1.25rem);
-  line-height: 1.6;
-  text-shadow: 0 0.08em 0.18em rgba(255, 248, 237, 0.76);
-}
-
-.final-cta .app-button {
-  grid-row: 8;
-  align-self: end;
+.final-cta__quote span {
+  color: #b5161d;
 }
 </style>

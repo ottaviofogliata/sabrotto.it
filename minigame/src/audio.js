@@ -776,6 +776,7 @@
   let tempoMultiplier = 1.0;        // 1.0 = normale, >1 = più veloce
   let jingleHandle = null;          // timeout per ripristinare il loop dopo un jingle
   let audioPrimed = false;
+  let silentUnlockBuffer = null;
 
   function ensureContext() {
     if (!AudioCtx) return false;
@@ -833,7 +834,40 @@
     for (let i = 0; i < data.length; i++) {
       data[i] = Math.random() * 2 - 1;
     }
+    if (typeof ctx.addEventListener === 'function') {
+      ctx.addEventListener('statechange', function () {
+        if (ctx && ctx.state === 'running') afterResume();
+      });
+    }
     return true;
+  }
+
+  function startUnlockSource(audible) {
+    if (!ctx || !masterBus) return;
+    try {
+      if (audible) {
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        const now = ctx.currentTime;
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        gainNode.gain.setValueAtTime(0.035, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.12);
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.14);
+        return;
+      }
+      if (!silentUnlockBuffer) silentUnlockBuffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+      const source = ctx.createBufferSource();
+      const gainNode = ctx.createGain();
+      source.buffer = silentUnlockBuffer;
+      gainNode.gain.value = 0.0001;
+      source.connect(gainNode);
+      gainNode.connect(ctx.destination);
+      source.start(0);
+    } catch (err) {}
   }
 
   function primeMobileAudio(force) {
@@ -1487,13 +1521,18 @@
   // Helper aggiuntivo per il jingle: schedula correttamente le note.
   // (la fanfara sopra usa scheduleTone, già definita.)
 
-  function unlock() {
+  function unlock(options) {
     if (!ensureContext()) return Promise.resolve(false);
+    const audible = options === true || !!(options && options.audible);
+    const resumePromise = ctx.state !== 'running' && ctx.resume
+      ? ctx.resume().catch(function () { return false; })
+      : Promise.resolve(true);
+    startUnlockSource(audible);
     if (ctx.state === 'running' || !ctx.resume) {
       afterResume();
       return Promise.resolve(true);
     }
-    return ctx.resume().then(function () {
+    return resumePromise.then(function () {
       afterResume();
       return ctx.state === 'running';
     }).catch(function () {

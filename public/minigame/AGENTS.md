@@ -41,7 +41,7 @@ Level height is always 14 rows; width is variable. Camera scrolls horizontally o
 - Coarse pointers/small screens show a gamepad-style control layout.
 - The left thumb cluster contains both left and right movement arrows.
 - The right thumb button is jump, so movement and jump can be combined with separate fingers.
-- Mobile audio is unlocked from pointer/touch/key gestures. The silent Web Audio primer only counts after the context is running, gameplay gestures retry the current level track, and the mobile audio button appears while the browser still requires an explicit audio gesture.
+- Mobile audio is unlocked from pointer/touch/key gestures. The iOS path starts the first Web Audio source synchronously inside the gesture, gameplay gestures retry the current level track, and the mobile audio button stays visible while the browser still requires an explicit audio gesture or the current track is not active.
 
 ## Score flow
 

@@ -19,10 +19,9 @@ onBeforeUnmount(() => {
   <header class="site-header" :class="{ 'site-header--scrolled': isScrolled }" aria-label="Navigazione principale">
     <nav class="site-header__nav" aria-label="Sezioni del sito">
       <a href="#invito">Invito</a>
-      <a href="#details">Dove</a>
+      <a href="#details">Location</a>
       <a href="#consigli">Consigli</a>
       <a href="#minigame">Minigame</a>
-      <a href="#conferma">RSVP</a>
     </nav>
   </header>
 </template>

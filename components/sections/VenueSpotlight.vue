@@ -9,7 +9,7 @@ defineProps<{
 const tips = [
   'Anche se il 12 settembre è ancora estate, la sera può rinfrescare: porta qualcosa da mettere sulle spalle al tramonto.',
   'Saremo in masseria, quindi consigliamo tacchi comodi. Se non vuoi rinunciare ai tacchi a spillo, non preoccuparti: ti forniremo una comoda alternativa.',
-  'Vi aspettiamo carichi e con la voglia di far festa: al vino e alla musica pensiamo noi! :)',
+  'Ti aspettiamo con la voglia di far festa: al vino e alla musica pensiamo noi! :)',
 ]
 </script>
 
@@ -61,7 +61,6 @@ const tips = [
   position: relative;
   padding-left: 1.6rem;
   color: color-mix(in srgb, var(--color-paper) 86%, var(--color-sage-light));
-  color: color-mix(in srgb, var(--color-paper) 86%, var(--color-sage-light));
   font-family: var(--font-sans);
   font-size: clamp(1.04rem, 1.45vw, 1.28rem);
   line-height: 1.85;
@@ -84,7 +83,7 @@ const tips = [
 }
 
 .spotlight .section-label {
-  color: color-mix(in srgb, var(--color-paper) 76%, var(--color-accent));
+  color: var(--color-gold-soft);
 }
 
 @media (max-width: 860px) {
