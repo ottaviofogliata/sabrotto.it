@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Super Sabrotto 16bit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #171220;
+    --ink-soft: #2f2240;
+    --panel: rgba(18, 13, 28, 0.82);
+    --panel-strong: rgba(14, 10, 24, 0.9);
+    --panel-line: rgba(255, 255, 255, 0.16);
+    --ui-fg: #fff7ef;
+    --ui-muted: #d7cce1;
+    --ui-accent: #ffd65d;
+    --ui-accent-2: #79d8ff;
+    --page-bg-1: #76d1ff;
+    --page-bg-2: #7d65d6;
+    --page-bg-3: #ffb169;
+    --page-glow: rgba(255, 196, 108, 0.24);
+  }
+
+  body[data-theme="sunrise"] {
+    --ui-accent: #ffd95f;
+    --ui-accent-2: #74d8ff;
+    --page-bg-1: #75d5ff;
+    --page-bg-2: #70b6ff;
+    --page-bg-3: #ffcf76;
+    --page-glow: rgba(116, 216, 255, 0.24);
+  }
+
+  body[data-theme="sunset"] {
+    --ui-accent: #ffd46b;
+    --ui-accent-2: #ff8f67;
+    --page-bg-1: #6670df;
+    --page-bg-2: #a358b4;
+    --page-bg-3: #ffad63;
+    --page-glow: rgba(255, 143, 103, 0.24);
+  }
+
+  body[data-theme="moonlight"] {
+    --ui-accent: #a7d6ff;
+    --ui-accent-2: #c1a1ff;
+    --page-bg-1: #1e356d;
+    --page-bg-2: #425da8;
+    --page-bg-3: #7f8fcf;
+    --page-glow: rgba(167, 214, 255, 0.18);
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 18% 16%, rgba(255, 255, 255, 0.18), transparent 26%),
+      radial-gradient(circle at 82% 18%, var(--page-glow), transparent 30%),
+      linear-gradient(180deg, var(--page-bg-1) 0%, var(--page-bg-2) 46%, var(--page-bg-3) 100%);
+    color: var(--ui-fg);
+    font-family: 'VT323', 'Courier New', monospace;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at center, transparent 56%, rgba(8, 6, 12, 0.2) 100%),
+      repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.02) 0,
+        rgba(255, 255, 255, 0.02) 1px,
+        transparent 1px,
+        transparent 22px
+      );
+  }
+
+  #stage {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  #game {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-width: 100vw;
+    max-height: 100vh;
+    max-height: 100dvh;
+    overflow: hidden;
+    background: #7ccfff;
+  }
+
+  #game::before,
+  #game::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  #game::before {
+    z-index: 4;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.14), transparent 16%),
+      repeating-linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.03) 0,
+        rgba(255, 255, 255, 0.03) 2px,
+        transparent 2px,
+        transparent 6px
+      );
+  }
+
+  #game::after {
+    z-index: 4;
+    background: radial-gradient(circle at center, transparent 62%, rgba(16, 11, 24, 0.12) 100%);
+  }
+
+  #c {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+  }
+
+  .hud {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    right: 14px;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    pointer-events: none;
+  }
+
+  .hud .group {
+    padding: 10px 12px 9px;
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02)), rgba(20, 14, 33, 0.62);
+    border: 2px solid var(--panel-line);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+    min-width: 0;
+  }
+
+  .hud .label,
+  .hud .val,
+  .overlay h1,
+  .banner .t,
+  .btn-kicker,
+  .btn-name {
+    font-family: 'Press Start 2P', monospace;
+  }
+
+  .hud .label,
+  .hud .val {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.34);
+  }
+
+  .hud .label {
+    font-size: clamp(7px, 0.9vmin, 10px);
+    color: var(--ui-accent);
+    letter-spacing: 0.08em;
+  }
+
+  .hud .val {
+    margin-top: 8px;
+    font-size: clamp(12px, 2vmin, 18px);
+    color: var(--ui-fg);
+  }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(14px, 3vmin, 32px);
+    padding: clamp(18px, 4vmin, 48px);
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    color: var(--ui-fg);
+    background:
+      repeating-linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.24) 0,
+        rgba(0, 0, 0, 0.24) 2px,
+        transparent 2px,
+        transparent 4px
+      ),
+      radial-gradient(circle at 50% 38%, #2a1a4f 0%, #0e0820 78%);
+  }
+
+  .overlay h1 {
+    margin: 0;
+    font-size: clamp(22px, 5.4vmin, 56px);
+    color: var(--ui-accent);
+    letter-spacing: 0.04em;
+    line-height: 1.18;
+    text-shadow:
+      4px 4px 0 #2a1840,
+      8px 8px 0 rgba(0, 0, 0, 0.45);
+  }
+
+  .overlay .kicker {
+    margin: 0;
+    font-size: clamp(10px, 1.6vmin, 18px);
+    color: var(--ui-accent-2);
+    letter-spacing: 0.4em;
+    line-height: 1.6;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.55);
+  }
+
+  .overlay .kicker.blink {
+    animation: arcade-blink 1.1s steps(2, end) infinite;
+  }
+
+  @keyframes arcade-blink {
+    0%, 50% { opacity: 1; }
+    50.01%, 100% { opacity: 0.18; }
+  }
+
+  .overlay .copyright {
+    margin: 0;
+    font-size: clamp(8px, 1.05vmin, 12px);
+    color: var(--ui-muted);
+    letter-spacing: 0.32em;
+    opacity: 0.75;
+  }
+
+  .menu-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: clamp(14px, 3vmin, 32px);
+    margin: 0;
+  }
+
+  .btn {
+    font-family: 'Press Start 2P', monospace;
+    background: var(--ui-accent);
+    color: #171220;
+    border: 4px solid #171220;
+    border-radius: 0;
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.55);
+    padding: clamp(12px, 2.2vmin, 22px) clamp(22px, 3.6vmin, 40px);
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(6px, 0.9vmin, 10px);
+    min-width: clamp(150px, 22vmin, 240px);
+    transition: transform 0.05s ease, box-shadow 0.05s ease, filter 0.05s ease;
+    text-decoration: none;
+  }
+
+  .btn:hover {
+    filter: brightness(1.06);
+  }
+
+  .btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.55);
+  }
+
+  .btn-kicker {
+    display: inline-block;
+    font-size: clamp(8px, 1vmin, 11px);
+    letter-spacing: 0.22em;
+    color: rgba(23, 18, 32, 0.7);
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  .btn-name {
+    display: block;
+    font-size: clamp(14px, 2.1vmin, 22px);
+    letter-spacing: 0.08em;
+    line-height: 1;
+    margin: 0;
+  }
+
+  .name-form {
+    display: grid;
+    justify-items: center;
+    gap: clamp(14px, 2.4vmin, 24px);
+    width: min(100%, 560px);
+  }
+
+  .name-input {
+    width: min(100%, 420px);
+    box-sizing: border-box;
+    padding: clamp(14px, 2.2vmin, 22px);
+    border: 4px solid #171220;
+    border-radius: 0;
+    background: #fff7ef;
+    color: #171220;
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.55);
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(14px, 2vmin, 22px);
+    letter-spacing: 0.08em;
+    line-height: 1.3;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .name-input:focus {
+    outline: 4px solid var(--ui-accent-2);
+    outline-offset: 4px;
+  }
+
+  .score-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    color: var(--ui-accent);
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(10px, 1.5vmin, 17px);
+    letter-spacing: 0.12em;
+    line-height: 1.5;
+    text-decoration: none;
+    text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.58);
+  }
+
+  .score-link:hover {
+    color: var(--ui-accent-2);
+  }
+
+  .coin-spin {
+    --coin-px: clamp(3px, 0.58vmin, 5px);
+    width: calc(var(--coin-px) * 5);
+    height: calc(var(--coin-px) * 5);
+    display: inline-block;
+    position: relative;
+    flex: 0 0 auto;
+    image-rendering: pixelated;
+    transform-origin: center;
+    animation: coin-spin 0.72s steps(4, end) infinite;
+  }
+
+  .coin-spin::before {
+    content: '';
+    position: absolute;
+    left: var(--coin-px);
+    top: 0;
+    width: var(--coin-px);
+    height: var(--coin-px);
+    background: #ffd65d;
+    filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.52));
+    box-shadow:
+      var(--coin-px) 0 #ffd65d,
+      calc(var(--coin-px) * 2) 0 #f0a93f,
+      calc(var(--coin-px) * -1) var(--coin-px) #ffd65d,
+      0 var(--coin-px) #fff099,
+      var(--coin-px) var(--coin-px) #fff099,
+      calc(var(--coin-px) * 2) var(--coin-px) #f0a93f,
+      calc(var(--coin-px) * 3) var(--coin-px) #8f5728,
+      calc(var(--coin-px) * -1) calc(var(--coin-px) * 2) #f0a93f,
+      0 calc(var(--coin-px) * 2) #ffd65d,
+      var(--coin-px) calc(var(--coin-px) * 2) #fff099,
+      calc(var(--coin-px) * 2) calc(var(--coin-px) * 2) #f0a93f,
+      calc(var(--coin-px) * 3) calc(var(--coin-px) * 2) #8f5728,
+      0 calc(var(--coin-px) * 3) #f0a93f,
+      var(--coin-px) calc(var(--coin-px) * 3) #ffd65d,
+      calc(var(--coin-px) * 2) calc(var(--coin-px) * 3) #8f5728;
+  }
+
+  @keyframes coin-spin {
+    0% { transform: scaleX(1); }
+    25% { transform: scaleX(0.48); }
+    50% { transform: scaleX(0.16); }
+    75% { transform: scaleX(0.48); }
+    100% { transform: scaleX(1); }
+  }
+
+  .form-error,
+  .score-line,
+  .score-save {
+    margin: 0;
+    font-family: 'Press Start 2P', monospace;
+    line-height: 1.55;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.55);
+  }
+
+  .form-error {
+    max-width: 620px;
+    min-height: 1.6em;
+    color: #ff8f67;
+    font-size: clamp(8px, 1.1vmin, 12px);
+    letter-spacing: 0.08em;
+  }
+
+  .score-line {
+    color: var(--ui-accent);
+    font-size: clamp(14px, 2.2vmin, 24px);
+    letter-spacing: 0.08em;
+  }
+
+  .score-save {
+    color: var(--ui-accent-2);
+    font-size: clamp(8px, 1.1vmin, 12px);
+    letter-spacing: 0.1em;
+  }
+
+  .hero-btn {
+    padding-top: clamp(14px, 2vmin, 20px);
+    padding-bottom: clamp(14px, 2vmin, 20px);
+  }
+
+  .hero-preview {
+    width: clamp(72px, 11vmin, 132px);
+    aspect-ratio: 4 / 5;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background:
+      repeating-linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.08) 0,
+        rgba(0, 0, 0, 0.08) 2px,
+        transparent 2px,
+        transparent 4px
+      ),
+      linear-gradient(180deg, #9bd4ff 0%, #f9c8a0 100%);
+    border: 3px solid #171220;
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.18);
+    display: block;
+    margin-bottom: clamp(4px, 0.6vmin, 8px);
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  .touch {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: none;
+    pointer-events: none;
+  }
+
+  .touch.show {
+    display: block;
+  }
+
+  .touch-pad {
+    position: absolute;
+    bottom: max(18px, calc(env(safe-area-inset-bottom) + 14px));
+    box-sizing: border-box;
+    pointer-events: auto;
+  }
+
+  .move-pad {
+    left: calc(14px + env(safe-area-inset-left, 0px));
+    display: grid;
+    grid-template-columns: repeat(2, var(--touch-btn));
+    gap: clamp(12px, 3.4vmin, 22px);
+    padding: clamp(8px, 2vmin, 14px);
+  }
+
+  .action-pad {
+    right: max(44px, calc(env(safe-area-inset-right, 0px) + 34px));
+    bottom: max(40px, calc(env(safe-area-inset-bottom, 0px) + 34px));
+    padding: clamp(8px, 2vmin, 14px);
+  }
+
+  .touch {
+    --touch-btn: clamp(68px, 15vmin, 98px);
+  }
+
+  .tbtn {
+    width: var(--touch-btn);
+    height: var(--touch-btn);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(27, 19, 39, 0.46);
+    border: 3px solid rgba(255, 255, 255, 0.46);
+    color: #fff;
+    font-size: clamp(28px, 5.4vmin, 40px);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+  }
+
+  .tbtn.jump {
+    width: clamp(78px, 17vmin, 112px);
+    height: clamp(78px, 17vmin, 112px);
+    background: rgba(255, 214, 93, 0.38);
+    border-color: rgba(255, 247, 239, 0.62);
+    color: #fff7ef;
+  }
+
+  .tbtn:active,
+  .tbtn.active {
+    transform: scale(0.94);
+    background: rgba(255, 255, 255, 0.44);
+  }
+
+  .audio-toggle {
+    position: fixed;
+    top: max(134px, calc(env(safe-area-inset-top, 0px) + 128px));
+    right: calc(16px + env(safe-area-inset-right, 0px));
+    z-index: 30;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: clamp(48px, 11vmin, 64px);
+    height: clamp(48px, 11vmin, 64px);
+    border-radius: 50%;
+    border: 3px solid rgba(255, 247, 239, 0.72);
+    background: rgba(255, 214, 93, 0.46);
+    color: #fff7ef;
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(16px, 3.2vmin, 22px);
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.48);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    cursor: pointer;
+  }
+
+  .audio-toggle.show {
+    display: flex;
+  }
+
+  .prince-timer {
+    position: absolute;
+    top: clamp(8px, 1.4vmin, 18px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 18px;
+    background: linear-gradient(180deg, rgba(255, 214, 93, 0.95), rgba(255, 178, 60, 0.95));
+    border: 3px solid #171220;
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.55);
+    color: #171220;
+    font-family: 'Press Start 2P', monospace;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .prince-timer.warn {
+    background: linear-gradient(180deg, #ff8f67, #ff6b3d);
+    color: #fff8e7;
+    animation: pt-pulse 0.4s steps(2, end) infinite;
+  }
+
+  @keyframes pt-pulse {
+    0%, 50% { filter: brightness(1); }
+    50.01%, 100% { filter: brightness(1.5); }
+  }
+
+  .prince-timer .pt-label {
+    font-size: clamp(8px, 1vmin, 11px);
+    letter-spacing: 0.22em;
+  }
+
+  .prince-timer .pt-clock {
+    font-size: clamp(18px, 2.6vmin, 28px);
+    letter-spacing: 0.06em;
+    line-height: 1;
+  }
+
+  .banner {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    z-index: 8;
+    transform: translateY(-50%);
+    text-align: center;
+    pointer-events: none;
+    color: var(--ui-fg);
+    text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.28);
+  }
+
+  .banner .t {
+    font-size: clamp(22px, 4.6vmin, 40px);
+    color: var(--ui-accent);
+    line-height: 1.3;
+  }
+
+  .banner .s {
+    margin-top: 8px;
+    font-size: clamp(20px, 3vmin, 28px);
+    color: #fff9f2;
+  }
+
+  @media (max-width: 760px) {
+    .hud {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .overlay {
+      padding: 14px;
+    }
+  }
+
+  @media (orientation: landscape) and (pointer: coarse) {
+    #game {
+      width: min(100vw, calc(100dvh * 2.05));
+      height: min(100dvh, calc(100vw / 2.05));
+    }
+  }
+
+  @media (pointer: coarse) {
+    .tbtn {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
+</style>
+</head>
+<body data-theme="sunrise">
+
+<div id="stage">
+  <div id="game">
+    <canvas id="c"></canvas>
+
+    <div class="hud">
+      <div class="group">
+        <span class="label" id="hud-name">OTTO</span>
+        <span class="val" id="lives">x3</span>
+      </div>
+      <div class="group">
+        <span class="label">COINS</span>
+        <span class="val" id="coins">00</span>
+      </div>
+      <div class="group">
+        <span class="label">WORLD</span>
+        <span class="val" id="world">1-1</span>
+      </div>
+      <div class="group">
+        <span class="label">TIME</span>
+        <span class="val" id="time">300</span>
+      </div>
+    </div>
+
+    <div class="banner hidden" id="banner">
+      <div class="t" id="banner-t">1-1 - SUNRISE SPRINT</div>
+      <div class="s" id="banner-s">Run to the flag.</div>
+    </div>
+
+    <div class="prince-timer hidden" id="prince-timer">
+      <span class="pt-label" id="prince-timer-label">PRINCE</span>
+      <span class="pt-clock" id="prince-timer-clock">8</span>
+    </div>
+
+    <div class="touch" id="touch">
+      <div class="touch-pad move-pad" id="zone-move">
+        <div class="tbtn" id="btn-left">◀</div>
+        <div class="tbtn" id="btn-right">▶</div>
+      </div>
+      <div class="touch-pad action-pad" id="zone-jump">
+        <div class="tbtn jump" id="btn-jump">▲</div>
+      </div>
+    </div>
+
+    <button class="audio-toggle" id="btn-audio" type="button" aria-label="Enable music">♪</button>
+
+    <div class="overlay" id="title">
+      <h1>SUPER SABROTTO<br>16BIT</h1>
+      <p class="kicker blink">SELECT PLAYER</p>
+      <div class="menu-grid">
+        <button class="btn hero-btn" data-hero="otto">
+          <canvas class="hero-preview" data-hero-sprite="otto" width="16" height="20"></canvas>
+          <span class="btn-kicker">1P</span>
+          <span class="btn-name">OTTO</span>
+        </button>
+        <button class="btn hero-btn" data-hero="sabrina">
+          <canvas class="hero-preview" data-hero-sprite="sabrina" width="16" height="20"></canvas>
+          <span class="btn-kicker">2P</span>
+          <span class="btn-name">SABRI</span>
+        </button>
+      </div>
+      <a class="score-link" href="leaderboard.html"><span>TOP SCORES</span><span class="coin-spin" aria-hidden="true"></span></a>
+      <p class="copyright">© SABROTTO · 12 · 09 · 2026</p>
+    </div>
+
+    <div class="overlay hidden" id="name-entry">
+      <h1>ENTER NAME</h1>
+      <p class="kicker" id="name-hero">1P OTTO READY</p>
+      <form class="name-form" id="name-form" autocomplete="off">
+        <input class="name-input" id="player-name" name="player-name" type="text" minlength="2" maxlength="12" inputmode="text" placeholder="PLAYER NAME" />
+        <p class="form-error hidden" id="name-error">NAME ERROR</p>
+        <div class="menu-grid">
+          <button class="btn" id="btn-start-run" type="submit">
+            <span class="btn-kicker">READY</span>
+            <span class="btn-name">START</span>
+          </button>
+          <button class="btn" id="btn-name-back" type="button">
+            <span class="btn-kicker">BACK</span>
+            <span class="btn-name">SELECT</span>
+          </button>
+        </div>
+      </form>
+      <p class="copyright">TOP 50 ONLY</p>
+    </div>
+
+    <div class="overlay hidden" id="dead">
+      <h1>GAME OVER</h1>
+      <p class="kicker" id="dead-sub">TRY AGAIN</p>
+      <div class="menu-grid">
+        <button class="btn" id="btn-retry">
+          <span class="btn-kicker">READY</span>
+          <span class="btn-name">RETRY</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="win">
+      <h1>LEVEL CLEAR</h1>
+      <p class="kicker" id="win-headline">SUPER OTTO SAVED PRINCESS SABRI</p>
+      <p class="score-line" id="win-score">PLAYER · 00000 PTS</p>
+      <p class="kicker" id="win-sub">FULL RUN CLEARED</p>
+      <p class="score-save" id="win-save">SCORE READY</p>
+      <div class="menu-grid">
+        <button class="btn" id="btn-again">
+          <span class="btn-kicker">REPLAY</span>
+          <span class="btn-name">START AGAIN</span>
+        </button>
+        <a class="btn" href="leaderboard.html">
+          <span class="btn-kicker">TOP</span>
+          <span class="btn-name">SCORES</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+	<script src="src/sprites.js?v=40"></script>
+	<script src="src/levels.js?v=40"></script>
+	<script src="src/engine.js?v=40"></script>
+	<script src="src/audio.js?v=40"></script>
+	<script src="src/game.js?v=40"></script>
+
+<script>
+  (function () {
+    const PREVIEW_FRAMES = {
+      otto:    ['otto_idle', 'otto_run1', 'otto_idle', 'otto_run2'],
+      sabrina: ['sabrina_idle', 'sabrina_run1', 'sabrina_idle', 'sabrina_run2'],
+    };
+
+    function paintPreview(canvas, sprName) {
+      const grid = window.SPRITES && window.SPRITES[sprName];
+      const palette = window.PALETTE;
+      if (!grid || !palette || !canvas) return;
+      const h = grid.length;
+      const w = grid[0].length;
+      if (canvas.width !== w) canvas.width = w;
+      if (canvas.height !== h) canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, w, h);
+      for (let r = 0; r < h; r++) {
+        const row = grid[r];
+        for (let c = 0; c < w; c++) {
+          const color = palette[row[c]];
+          if (!color) continue;
+          ctx.fillStyle = color;
+          ctx.fillRect(c, r, 1, 1);
+        }
+      }
+    }
+
+    function startHeroPreviews() {
+      const cans = Array.from(document.querySelectorAll('.hero-preview[data-hero-sprite]'));
+      if (!cans.length) return;
+      let frame = 0;
+      const tick = function () {
+        cans.forEach(function (canvas) {
+          const seq = PREVIEW_FRAMES[canvas.dataset.heroSprite] || PREVIEW_FRAMES.otto;
+          paintPreview(canvas, seq[frame % seq.length]);
+        });
+        frame++;
+      };
+      tick();
+      setInterval(tick, 240);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', startHeroPreviews);
+    } else {
+      startHeroPreviews();
+    }
+  })();
+</script>
+
+</body>
+</html>

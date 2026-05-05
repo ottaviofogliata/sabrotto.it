@@ -1,0 +1,18 @@
+:root {
+  --color-sage: #6f7a5a;
+  --color-sage-light: #d9dec9;
+  --color-sage-pale: #eee9dd;
+  --color-sage-dark: #4d563d;
+  --color-ivory: #f7f0e6;
+  --color-blush: #d8c9bd;
+  --color-stone: #e5dacc;
+  --color-accent: #b89a4f;
+  --color-accent-deep: #7a3f35;
+  --color-maiolica-blue: #24384d;
+  --color-ink: #17140f;
+  --color-ink-muted: #625b4d;
+  --color-button-text: #fff8ed;
+  --color-focus: #d8c189;
+  --color-paper: #fff8ed;
+  --color-gold-soft: #d8c189;
+}

@@ -1,0 +1,16 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//sabrotto.it//Ottavio e Sabrina//IT
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:ottavio-sabrina-20260912@sabrotto.it
+DTSTAMP:20260503T184900Z
+DTSTART:20260912T143000Z
+DTEND:20260912T215900Z
+SUMMARY:Matrimonio di Ottavio e Sabrina
+LOCATION:Chiesa Santa Famiglia da Nazareth, Viale della Liberta, 74015 Martina Franca (TA)
+DESCRIPTION:Cerimonia alle 16:30 a Martina Franca e festa a Masseria Luco.
+URL:https://sabrotto.it/
+END:VEVENT
+END:VCALENDAR

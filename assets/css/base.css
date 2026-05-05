@@ -1,0 +1,40 @@
+html {
+  scroll-behavior: smooth;
+}
+
+[id] {
+  scroll-margin-top: 5rem;
+}
+
+body {
+  margin: 0;
+  color: var(--color-ink);
+  background: var(--color-ivory);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+:root {
+  --page-gutter: clamp(1.25rem, 4vw, 4.5rem);
+}
+
+.wedding-page {
+  min-width: 320px;
+  overflow: clip;
+}
