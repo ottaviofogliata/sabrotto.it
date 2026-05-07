@@ -47,7 +47,7 @@ Level height is always 14 rows; width is variable. Camera scrolls horizontally o
 
 - Player select is followed by `#name-entry`, an arcade-style player-name screen.
 - Player names are normalized to uppercase, 2-12 chars, and allow letters, numbers, space, apostrophe, and hyphen.
-- When served through Nuxt, `src/game.js` calls `/api/minigame/session` before starting a run and `/api/minigame/scores` after the final rescue.
+- When served through Nuxt, `src/game.js` calls `/api/minigame/session` before starting a run and `/api/minigame/scores` after the final rescue or after game over when the player has lost all lives.
 - If the run reaches the final rescue without a valid score token, `src/game.js` retries session creation before falling back to local-only, and transient final-score submit failures retry in-place.
 - Direct `file://` play still works, but scores are local-only because the Nuxt API is unavailable.
 - Final score formula is `10000 + coins * 100 + ceil(timeRemaining) * 10 + lives * 1000`.

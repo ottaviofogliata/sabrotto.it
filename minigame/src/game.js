@@ -223,44 +223,54 @@ async function startRunFromName() {
   }
 }
 
-function finalRunStats() {
+function finalRunStats(outcome) {
+  const rescued = outcome !== 'game-over';
   return {
     completed: true,
+    outcome: rescued ? 'rescued' : 'game_over',
     heroKey: State.heroKey,
     coins: Math.max(0, Math.floor(State.totalCoinsRun)),
-    timeRemaining: Math.max(0, Math.ceil(State.time)),
-    lives: Math.max(0, Math.floor(State.lives)),
+    timeRemaining: rescued ? Math.max(0, Math.ceil(State.time)) : 0,
+    lives: rescued ? Math.max(0, Math.floor(State.lives)) : 0,
     durationMs: Math.max(0, Math.round(performance.now() - (State.runStartedAt || State.startedAt || performance.now()))),
     levelIndex: State.levelIndex,
-    levelsCleared: LEVELS.length,
+    levelsCleared: rescued ? LEVELS.length : Math.max(1, Math.min(LEVELS.length, State.levelIndex)),
   };
 }
 
-function updateWinScoreUi(stats, saveText) {
+function updateScoreUi(stats, saveText, prefix, statsId) {
+  const idPrefix = prefix || 'win';
   const score = calculateFinalScore(stats);
-  const winScore = document.getElementById('win-score');
-  const winSub = document.getElementById('win-sub');
-  const winSave = document.getElementById('win-save');
-  if (winScore) winScore.textContent = State.playerName + ' · ' + formatScore(score) + ' PTS';
-  if (winSub) {
-    winSub.textContent =
-      'COINS ' + stats.coins + ' · TIME ' + stats.timeRemaining + ' · LIVES ' + stats.lives;
+  const scoreEl = document.getElementById(idPrefix + '-score');
+  const subEl = document.getElementById(statsId || idPrefix + '-sub');
+  const saveEl = document.getElementById(idPrefix + '-save');
+  if (scoreEl) {
+    scoreEl.textContent = State.playerName + ' · ' + formatScore(score) + ' PTS';
+    scoreEl.classList.remove('hidden');
   }
-  if (winSave) winSave.textContent = saveText || 'SCORE READY';
+  if (subEl) {
+    subEl.textContent =
+      'COINS ' + stats.coins + ' · TIME ' + stats.timeRemaining + ' · LIVES ' + stats.lives;
+    subEl.classList.remove('hidden');
+  }
+  if (saveEl) {
+    saveEl.textContent = saveText || 'SCORE READY';
+    saveEl.classList.remove('hidden');
+  }
 }
 
-async function submitFinalScore(stats) {
+async function submitFinalScore(stats, statusId, overlayId) {
   if (State.scoreSubmitted) return;
   State.scoreSubmitted = true;
-  const winSave = document.getElementById('win-save');
+  const scoreSave = document.getElementById(statusId || 'win-save');
 
   if (!scoreApiEnabled()) {
-    if (winSave) winSave.textContent = 'SCORE LOCAL ONLY';
+    if (scoreSave) scoreSave.textContent = 'SCORE LOCAL ONLY';
     return;
   }
 
   if (!State.scoreToken || State.scoreOffline) {
-    if (winSave) winSave.textContent = 'CONNECTING SCORE...';
+    if (scoreSave) scoreSave.textContent = 'CONNECTING SCORE...';
     try {
       const session = await requestScoreSession(State.normalizedPlayerName || State.playerName);
       setPlayerName(session.playerName, session.normalizedName);
@@ -271,11 +281,11 @@ async function submitFinalScore(stats) {
 
   if (!State.scoreToken || State.scoreOffline) {
     State.scoreSubmitted = false;
-    retryFinalScore(stats, 'SCORE RETRY...');
+    retryFinalScore(stats, 'SCORE RETRY...', statusId, overlayId);
     return;
   }
 
-  if (winSave) winSave.textContent = 'SAVING SCORE...';
+  if (scoreSave) scoreSave.textContent = 'SAVING SCORE...';
   let response;
   try {
     response = await fetch(SCORE_API_ROOT + '/scores', {
@@ -289,7 +299,7 @@ async function submitFinalScore(stats) {
     });
   } catch (err) {
     State.scoreSubmitted = false;
-    retryFinalScore(stats, 'SCORE RETRY...');
+    retryFinalScore(stats, 'SCORE RETRY...', statusId, overlayId);
     return;
   }
 
@@ -298,37 +308,37 @@ async function submitFinalScore(stats) {
       State.scoreToken = null;
       State.scoreOffline = false;
       State.scoreSubmitted = false;
-      retryFinalScore(stats, 'SCORE RETRY...');
+      retryFinalScore(stats, 'SCORE RETRY...', statusId, overlayId);
       return;
     }
     const message = await readErrorMessage(response, 'SCORE NOT SAVED');
-    if (winSave) winSave.textContent = normalizePlayerName(message).slice(0, 28) || 'SCORE NOT SAVED';
+    if (scoreSave) scoreSave.textContent = normalizePlayerName(message).slice(0, 28) || 'SCORE NOT SAVED';
     return;
   }
 
   const data = await response.json();
   clearScoreRetry();
-  if (winSave) {
-    winSave.textContent = data.kept
+  if (scoreSave) {
+    scoreSave.textContent = data.kept
       ? 'SCORE SAVED #' + data.rank
       : 'SCORE UNDER TOP 50';
   }
 }
 
-function retryFinalScore(stats, message) {
-  const winSave = document.getElementById('win-save');
-  const win = document.getElementById('win');
-  if (!win || win.classList.contains('hidden')) return;
+function retryFinalScore(stats, message, statusId, overlayId) {
+  const scoreSave = document.getElementById(statusId || 'win-save');
+  const overlay = document.getElementById(overlayId || 'win');
+  if (!overlay || overlay.classList.contains('hidden')) return;
   const count = State.scoreRetryCount || 0;
   if (count >= SCORE_RETRY_DELAYS.length) {
-    if (winSave) winSave.textContent = 'SCORE NOT SAVED';
+    if (scoreSave) scoreSave.textContent = 'SCORE NOT SAVED';
     return;
   }
   State.scoreRetryCount = count + 1;
-  if (winSave) winSave.textContent = message;
+  if (scoreSave) scoreSave.textContent = message;
   State.scoreRetryTimer = setTimeout(function () {
     State.scoreRetryTimer = null;
-    submitFinalScore(stats);
+    submitFinalScore(stats, statusId, overlayId);
   }, SCORE_RETRY_DELAYS[count]);
 }
 
@@ -2073,7 +2083,7 @@ function onPlayerWin() {
       document.getElementById('win-headline').textContent =
         currentHero().name + ' ha salvato ' + currentHero().rescueName + '!';
       document.getElementById('win').classList.remove('hidden');
-      updateWinScoreUi(stats, 'SCORE READY');
+      updateScoreUi(stats, 'SCORE READY', 'win');
       submitFinalScore(stats);
     }, 2400);
   }
@@ -2108,9 +2118,15 @@ function onPlayerDie() {
   State.running = false;
   stopMusic();
   if (State.lives <= 0) {
+    const stats = finalRunStats('game-over');
     document.getElementById('dead-sub').textContent = gameOverMessage();
+    updateScoreUi(stats, 'SCORE READY', 'dead', 'dead-stats');
+    submitFinalScore(stats, 'dead-save', 'dead');
   } else {
     document.getElementById('dead-sub').textContent = State._deathReason || pickDeath('enemy');
+    document.getElementById('dead-score').classList.add('hidden');
+    document.getElementById('dead-stats').classList.add('hidden');
+    document.getElementById('dead-save').classList.add('hidden');
   }
   document.getElementById('dead').classList.remove('hidden');
 }

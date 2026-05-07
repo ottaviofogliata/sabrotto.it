@@ -48,7 +48,7 @@ export const wedding: WeddingEvent = {
   rsvp: {
     label: 'Rispondi',
     ariaLabel: 'Conferma la tua presenza al matrimonio',
-    href: 'https://form.typeform.com/to/noD1plgt',
+    href: 'https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=Wft223ejIEG8VFnerX05yfdbgs2R8chNqU01r-t0EOVUOVdQT00wN1dDTjdRMVVBTEpaQjdRME1aQy4u',
   },
   minigame: {
     label: 'Gioca',
