@@ -54,7 +54,7 @@ Use these build settings:
 
 ```text
 Build command: npm run generate
-Build output directory: .output/public
+Build output directory: dist
 ```
 
 The static site uses a small Pages Function for `/api/minigame/*` and a D1
