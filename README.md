@@ -47,6 +47,22 @@ This generates the server and public assets inside:
 .output/
 ```
 
+## Cloudflare Pages
+
+The production site is exported as static files and deployed with Cloudflare Pages.
+Use these build settings:
+
+```text
+Build command: npm run generate
+Build output directory: .output/public
+```
+
+The static site uses a small Pages Function for `/api/minigame/*` and a D1
+database for the minigame leaderboard. Create the database from
+`cloudflare/d1-schema.sql`, then bind it to the Pages project as
+`MINIGAME_DB`. `public/_routes.json` ensures that only minigame API requests
+invoke the Function; static asset requests remain static.
+
 ## Start the production build
 
 After building, start the generated Node server with:

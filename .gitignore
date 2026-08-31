@@ -11,7 +11,7 @@ node_modules/
 .nitro/
 .data/
 .cache/
-dist/
+dist
 *.local
 
 # Logs
