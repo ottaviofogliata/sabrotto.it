@@ -25,7 +25,6 @@ const libraryInput = ref<HTMLInputElement>()
 const cameraInput = ref<HTMLInputElement>()
 const items = ref<PhotoItem[]>([])
 const selectionKind = ref<'library' | 'camera'>('library')
-const isPreparing = ref(false)
 const isUploading = ref(false)
 const isSuccess = ref(false)
 const uploadedCount = ref(0)
@@ -37,6 +36,7 @@ useSeoMeta({
 })
 
 const readyItems = computed(() => items.value.filter(item => item.prepared && item.status !== 'uploaded'))
+const isPreparing = computed(() => items.value.some(item => item.status === 'preparing'))
 const hasErrors = computed(() => items.value.some(item => item.status === 'error'))
 const overallProgress = computed(() => {
   if (!items.value.length) return 0
@@ -155,26 +155,33 @@ async function addFiles(files: File[], kind: 'library' | 'camera') {
   const accepted = files.slice(0, capacity)
   if (!accepted.length) return
 
-  isPreparing.value = true
-  for (const source of accepted) {
-    const item: PhotoItem = {
+  // Reserve every slot immediately so overlapping picker actions cannot exceed
+  // the batch limit. Each item must be reactive because preparation mutates it
+  // after it has already been inserted in the selection.
+  const pendingItems = accepted.map(source => ({
+    source,
+    item: reactive<PhotoItem>({
       id: makeId(),
       sourceName: source.name,
       status: 'preparing',
       prepareProgress: 0,
       uploadProgress: 0,
-    }
-    items.value.push(item)
+    }),
+  }))
+  items.value.push(...pendingItems.map(({ item }) => item))
+
+  for (const { source, item } of pendingItems) {
     try {
       item.prepared = await preparePhoto(source, progress => { item.prepareProgress = progress })
+      if (!items.value.some(candidate => candidate.id === item.id)) continue
       item.previewUrl = URL.createObjectURL(item.prepared.file)
       item.status = 'ready'
     } catch (error) {
+      if (!items.value.some(candidate => candidate.id === item.id)) continue
       item.status = 'error'
       item.error = error instanceof Error ? error.message : 'Non riesco a preparare questa foto.'
     }
   }
-  isPreparing.value = false
 }
 
 async function onLibraryChange(event: Event) {
