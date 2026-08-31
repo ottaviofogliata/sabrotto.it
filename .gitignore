@@ -22,14 +22,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Runtime data
-data/minigame-scores.txt
-
 # Environment files
 .env
 .env.*
 !.env.example
-!.env.deploy.example
 
 # Editor and tooling
 .idea/

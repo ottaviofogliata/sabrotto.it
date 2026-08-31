@@ -11,7 +11,7 @@ Vanilla-JS side-scrolling platformer (no build step). Source lives in `src/` and
 | `src/levels.js` | `LEVELS` array. Each entry has `rows` (string grid), `theme`, `code`, `name`, `timeLimit`, `subtitle`. |
 | `src/audio.js` | Web Audio synth. `window.AUDIO` with `unlock()`, `playSfx(name)`, `playLevelTrack(idx)`, `stop()`. |
 | `src/game.js` | Game loop, physics, enemies, camera, HUD, name entry, score submission, win/lose flow. Reads `window.ENGINE`, `window.AUDIO`, `LEVELS`, `SPRITES`. |
-| `leaderboard.html` | 16bit top-50 scoreboard page. Loads `/api/minigame/scores` when served by Nuxt. |
+| `leaderboard.html` | 16bit top-50 scoreboard page. Loads `/api/minigame/scores` from a Cloudflare Pages Function. |
 | `sprites.html` | Dev gallery — renders every sprite from `SPRITES` for visual QA. |
 
 ## Coordinate system
@@ -47,15 +47,15 @@ Level height is always 14 rows; width is variable. Camera scrolls horizontally o
 
 - Player select is followed by `#name-entry`, an arcade-style player-name screen.
 - Player names are normalized to uppercase, 2-12 chars, and allow letters, numbers, space, apostrophe, and hyphen.
-- When served through Nuxt, `src/game.js` calls `/api/minigame/session` before starting a run and `/api/minigame/scores` after the final rescue or after game over when the player has lost all lives.
+- When served from the production site, `src/game.js` calls the Cloudflare Pages Function at `/api/minigame/session` before starting a run and `/api/minigame/scores` after the final rescue or after game over when the player has lost all lives.
 - If the run reaches the final rescue without a valid score token, `src/game.js` retries session creation before falling back to local-only, and transient final-score submit failures retry in-place.
-- Direct `file://` play still works, but scores are local-only because the Nuxt API is unavailable.
+- Direct `file://` play still works, but scores are local-only because the Pages Function is unavailable.
 - Final score formula is `10000 + coins * 100 + ceil(timeRemaining) * 10 + lives * 1000`.
-- Nuxt stores scores in `data/minigame-scores.txt` as JSONL and keeps only the top 50.
+- Cloudflare D1 database `sabrotto-leaderboard`, bound as `MINIGAME_DB`, stores score sessions and keeps only the top 50 scores.
 
 ## Served copy
 
-The Nuxt site serves the game from `/public/minigame/`. After changing files in this directory, sync the changed HTML/assets/source files into `/Users/cybrntc/Sites/sabrotto.it/public/minigame/` and keep script cache versions aligned.
+The Nuxt site serves the game from `/public/minigame/`. After changing files in this directory, sync the changed HTML/assets/source files into the repository's `public/minigame/` directory and keep script cache versions aligned.
 
 ## Adding a sprite
 

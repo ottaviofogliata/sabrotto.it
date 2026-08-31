@@ -41,10 +41,10 @@ Create the production build with:
 npm run build
 ```
 
-This generates the server and public assets inside:
+This generates the static site inside:
 
 ```text
-.output/
+dist/
 ```
 
 ## Cloudflare Pages
@@ -63,26 +63,6 @@ database for the minigame leaderboard. Create the database from
 `MINIGAME_DB`. `public/_routes.json` ensures that only minigame API requests
 invoke the Function; static asset requests remain static.
 
-## Start the production build
-
-After building, start the generated Node server with:
-
-```bash
-node .output/server/index.mjs
-```
-
-By default, it listens on:
-
-```text
-http://localhost:3000
-```
-
-You can override the port if needed:
-
-```bash
-PORT=4000 node .output/server/index.mjs
-```
-
 ## Preview the production build
 
 If you want a Nuxt-managed local preview after the build, run:
@@ -91,16 +71,7 @@ If you want a Nuxt-managed local preview after the build, run:
 npm run preview
 ```
 
-## Environment variables
-
-The minigame score API uses these server-side environment variables:
-
-- `MINIGAME_SCORE_SECRET`: HMAC secret for score-session tokens. Required in production.
-- `MINIGAME_SCORE_FILE`: Override path for the score file. Defaults to `data/minigame-scores.txt`.
-
-For deploys, put `MINIGAME_SCORE_SECRET` in `.env.deploy`. The deploy script installs it into the remote systemd service and stores scores in `/var/www/<domain>/shared/minigame-scores.txt`.
-
 ## Notes
 
-- The current Nuxt build uses the `node-server` Nitro preset.
+- Production is fully static apart from the leaderboard Pages Function backed by D1.
 - The `minigame/` directory contains standalone HTML/JS source files. The served copy lives in `public/minigame/`.
