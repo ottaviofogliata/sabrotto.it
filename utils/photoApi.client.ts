@@ -78,11 +78,27 @@ export async function uploadPreparedPhoto(
     }),
   })
 
-  await uploadBlobDirectly(upload.uploadUrl, photo.file, onProgress)
-  await apiJson(`/api/photos/uploads/${upload.photoId}/complete`, {
-    method: 'POST',
-    body: JSON.stringify({ completionToken: upload.completionToken }),
-  })
+  // Google Drive can accept the upload while its cross-origin response remains
+  // unreadable to the browser (notably on mobile Safari/Chrome). In that case
+  // XMLHttpRequest reports a network error even though the file is already in
+  // Drive. Always ask our Worker to verify the reserved file before deciding
+  // that the upload failed.
+  let directUploadError: unknown
+  try {
+    await uploadBlobDirectly(upload.uploadUrl, photo.file, onProgress)
+  } catch (error) {
+    directUploadError = error
+  }
+
+  try {
+    await apiJson(`/api/photos/uploads/${upload.photoId}/complete`, {
+      method: 'POST',
+      body: JSON.stringify({ completionToken: upload.completionToken }),
+    })
+  } catch (error) {
+    if (directUploadError instanceof Error) throw directUploadError
+    throw error
+  }
   return upload.photoId
 }
 
