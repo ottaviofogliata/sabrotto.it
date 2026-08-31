@@ -90,6 +90,48 @@ function request(url: string, init: RequestInit = {}) {
 }
 
 describe('photo API flow', () => {
+  it('opens a guest session with Turnstile and no private access key', async () => {
+    const response = await onRequest({
+      request: request('/api/photos/access/guest', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ turnstileToken: 'valid-turnstile-token' }),
+      }),
+      env: {
+        PHOTO_SESSION_SIGNING_SECRET: 'photo-session-signing-secret-for-tests',
+        TURNSTILE_SECRET_KEY: 'turnstile-test-secret',
+        PHOTO_ALLOWED_ORIGINS: 'https://sabrotto.it',
+        __fetch: async (url: string) => {
+          if (url.includes('/turnstile/v0/siteverify')) return Response.json({ success: true })
+          throw new Error(`Unexpected fetch: ${url}`)
+        },
+      },
+    } as any)
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('set-cookie')).toContain('sb_photo_guest=')
+    expect(response.headers.get('set-cookie')).toContain('HttpOnly')
+    expect(response.headers.get('set-cookie')).toContain('SameSite=Strict')
+  })
+
+  it('keeps gallery access behind its private key', async () => {
+    const galleryKey = 'gallery-key-for-tests'
+    const response = await onRequest({
+      request: request('/api/photos/access/gallery', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ accessKey: 'wrong-key' }),
+      }),
+      env: {
+        PHOTO_SESSION_SIGNING_SECRET: 'photo-session-signing-secret-for-tests',
+        PHOTO_GALLERY_KEY_HASH: await __test.sha256Hex(galleryKey),
+        PHOTO_ALLOWED_ORIGINS: 'https://sabrotto.it',
+      },
+    } as any)
+
+    expect(response.status).toBe(403)
+  })
+
   it('creates, verifies, lists and serves a Drive-backed photo', async () => {
     const database = new MockD1()
     const signingSecret = 'photo-session-signing-secret-for-tests'

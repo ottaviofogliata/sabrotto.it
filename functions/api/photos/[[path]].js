@@ -193,15 +193,16 @@ async function exchangeAccess(request, env, role) {
   enforceAllowedOrigin(request, env);
   requireEnvironment(env, ['PHOTO_SESSION_SIGNING_SECRET']);
   const body = await readJson(request);
-  const accessKey = typeof body.accessKey === 'string' ? body.accessKey : '';
-  const hashName = role === 'guest' ? 'PHOTO_GUEST_KEY_HASH' : 'PHOTO_GALLERY_KEY_HASH';
-  requireEnvironment(env, [hashName]);
-
-  const suppliedHash = await sha256Hex(accessKey);
-  if (!constantTimeEqual(suppliedHash, String(env[hashName]).toLowerCase())) {
-    throw new ApiError(403, 'Invalid private link');
+  if (role === 'guest') {
+    await verifyTurnstile(request, env, body.turnstileToken);
+  } else {
+    requireEnvironment(env, ['PHOTO_GALLERY_KEY_HASH']);
+    const accessKey = typeof body.accessKey === 'string' ? body.accessKey : '';
+    const suppliedHash = await sha256Hex(accessKey);
+    if (!constantTimeEqual(suppliedHash, String(env.PHOTO_GALLERY_KEY_HASH).toLowerCase())) {
+      throw new ApiError(403, 'Invalid private link');
+    }
   }
-  if (role === 'guest') await verifyTurnstile(request, env, body.turnstileToken);
 
   const ttl = role === 'guest' ? GUEST_TTL_SECONDS : GALLERY_TTL_SECONDS;
   const expiresAt = Math.floor(Date.now() / 1000) + ttl;

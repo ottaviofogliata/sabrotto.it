@@ -78,7 +78,6 @@ GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET
 GOOGLE_REFRESH_TOKEN
 GOOGLE_DRIVE_FOLDER_ID
-PHOTO_GUEST_KEY_HASH
 PHOTO_GALLERY_KEY_HASH
 PHOTO_SESSION_SIGNING_SECRET
 PHOTO_ALLOWED_ORIGINS
@@ -86,9 +85,10 @@ TURNSTILE_SECRET_KEY
 NUXT_PUBLIC_TURNSTILE_SITE_KEY
 ```
 
-The two access keys are random values shared only in URL fragments; store
-their lowercase SHA-256 hashes in Cloudflare. Never commit keys, OAuth tokens,
-or QR codes.
+The guest page relies on Turnstile and a short-lived signed session; it does
+not require an access key. The gallery operator key is shared only in a URL
+fragment; store its lowercase SHA-256 hash in Cloudflare. Never commit keys,
+OAuth tokens, or QR codes.
 
 For preview deployments, include `https://sabrotto-it.pages.dev` and
 `https://*.sabrotto-it.pages.dev` in `PHOTO_ALLOWED_ORIGINS`. Adding the

@@ -19,8 +19,7 @@ interface PhotoItem {
 
 const config = useRuntimeConfig()
 const accessState = ref<AccessState>('checking')
-const accessMessage = ref('Verifica del link privato…')
-const privateAccessKey = ref('')
+const accessMessage = ref('Verifica rapida in corso…')
 const turnstileWidget = ref<string>()
 const libraryInput = ref<HTMLInputElement>()
 const cameraInput = ref<HTMLInputElement>()
@@ -100,9 +99,8 @@ async function renderTurnstile() {
 async function authorizeGuest(turnstileToken: string) {
   accessMessage.value = 'Apro la missione…'
   try {
-    await exchangeGuestAccess(privateAccessKey.value, turnstileToken)
+    await exchangeGuestAccess(turnstileToken)
     history.replaceState(null, '', `${location.pathname}${location.search}`)
-    privateAccessKey.value = ''
     accessState.value = 'authorized'
   } catch (error) {
     accessMessage.value = error instanceof Error ? error.message : 'Link privato non valido.'
@@ -118,33 +116,24 @@ async function initializeAccess() {
       return
     }
   } catch (error) {
-    if (!location.hash) {
-      accessState.value = 'denied'
-      accessMessage.value = error instanceof Error ? error.message : 'Servizio fotografico non disponibile.'
-      return
-    }
-  }
-
-  // Some static hosts normalize `/foto` to `/foto/`. Give the browser a
-  // moment to restore the fragment after that redirect before rejecting it.
-  if (!location.hash) await new Promise(resolve => setTimeout(resolve, 200))
-  privateAccessKey.value = decodeURIComponent(location.hash.slice(1)).trim()
-  if (!privateAccessKey.value) {
     accessState.value = 'denied'
-    accessMessage.value = 'Apri il link privato ricevuto dagli sposi.'
+    accessMessage.value = error instanceof Error ? error.message : 'Servizio fotografico non disponibile.'
     return
   }
+  history.replaceState(null, '', `${location.pathname}${location.search}`)
   accessState.value = 'turnstile'
-  accessMessage.value = 'Un ultimo controllo e la missione può iniziare.'
+  accessMessage.value = 'Un controllo anti-bot e la missione può iniziare.'
   await renderTurnstile()
 }
 
 function openLibrary() {
+  if (accessState.value !== 'authorized') return
   selectionKind.value = 'library'
   libraryInput.value?.click()
 }
 
 function openCamera() {
+  if (accessState.value !== 'authorized') return
   selectionKind.value = 'camera'
   cameraInput.value?.click()
 }
@@ -298,16 +287,14 @@ onBeforeUnmount(() => {
     <div class="paparazzi-page__glow paparazzi-page__glow--one" />
     <div class="paparazzi-page__glow paparazzi-page__glow--two" />
 
-    <section v-if="accessState !== 'authorized'" class="access-card" aria-live="polite">
+    <section v-if="accessState === 'denied'" class="access-card" aria-live="polite">
       <div class="camera-mark" aria-hidden="true">
         <span class="camera-mark__lens" />
       </div>
       <p class="eyebrow">Ottavio &amp; Sabrina</p>
       <h1>Missione<br><em>Paparazzi</em></h1>
-      <div v-if="accessState === 'checking'" class="loader" aria-hidden="true" />
       <p class="access-card__message">{{ accessMessage }}</p>
-      <div v-if="accessState === 'turnstile'" id="photo-turnstile" class="turnstile-slot" />
-      <a v-if="accessState === 'denied'" class="text-home" href="/">Torna all’invito</a>
+      <a class="text-home" href="/">Torna all’invito</a>
     </section>
 
     <section v-else-if="isSuccess" class="mission-card mission-card--success" aria-live="polite">
@@ -338,14 +325,19 @@ onBeforeUnmount(() => {
           Cattura sorrisi, balli e momenti memorabili. Tu scatti, noi li proiettiamo.
         </p>
         <div class="start-actions">
-          <button class="primary-action" type="button" @click="openLibrary">
+          <button class="primary-action" type="button" :disabled="accessState !== 'authorized'" @click="openLibrary">
             <span class="action-icon" aria-hidden="true">▧</span>
             <span>Carica foto</span>
           </button>
-          <button class="secondary-action" type="button" @click="openCamera">
+          <button class="secondary-action" type="button" :disabled="accessState !== 'authorized'" @click="openCamera">
             <span class="action-icon" aria-hidden="true">◎</span>
             <span>Scatta una foto</span>
           </button>
+        </div>
+        <div v-if="accessState !== 'authorized'" class="inline-verification" aria-live="polite">
+          <div v-if="accessState === 'checking'" class="loader" aria-hidden="true" />
+          <p>{{ accessMessage }}</p>
+          <div v-if="accessState === 'turnstile'" id="photo-turnstile" class="turnstile-slot" />
         </div>
         <p class="privacy-note">Le foto vengono ottimizzate sul tuo telefono e inviate alla cartella privata degli sposi.</p>
       </template>
@@ -575,6 +567,9 @@ h2 { font-size: clamp(2rem, 7vw, 3rem); }
 }
 
 .turnstile-slot { min-height: 4.5rem; margin-top: 1rem; }
+.inline-verification { margin-top: 1rem; text-align: center; }
+.inline-verification .loader { margin-top: 0.8rem; }
+.inline-verification p { margin: 0.8rem 0 0; color: var(--color-ink-muted); font-family: var(--font-sans); font-size: 0.82rem; }
 .text-home { color: var(--color-maiolica-blue); font-family: var(--font-sans); font-weight: 700; text-underline-offset: 0.3em; }
 
 .start-actions,

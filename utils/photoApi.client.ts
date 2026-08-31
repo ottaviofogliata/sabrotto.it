@@ -23,10 +23,10 @@ export async function readPhotoSession(role: 'guest' | 'gallery') {
   return apiJson<{ authorized: boolean, expiresAt?: number }>(`/api/photos/session?role=${role}`)
 }
 
-export async function exchangeGuestAccess(accessKey: string, turnstileToken: string) {
+export async function exchangeGuestAccess(turnstileToken: string) {
   return apiJson<{ authorized: true }>('/api/photos/access/guest', {
     method: 'POST',
-    body: JSON.stringify({ accessKey, turnstileToken }),
+    body: JSON.stringify({ turnstileToken }),
   })
 }
 
