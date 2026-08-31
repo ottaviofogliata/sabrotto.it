@@ -63,6 +63,38 @@ database for the minigame leaderboard. Create the database from
 `MINIGAME_DB`. `public/_routes.json` ensures that only minigame API requests
 invoke the Function; static asset requests remain static.
 
+### Private wedding photos
+
+`/foto` and `/gallery` use a second Pages Function namespace at
+`/api/photos/*`. Photos are compressed in the browser and uploaded directly to
+a private Google Drive folder through resumable upload sessions. D1 stores only
+the mapping and display metadata.
+
+Create a separate D1 database from `cloudflare/photos-d1-schema.sql` and bind
+it as `PHOTO_DB`. Configure these production and preview secrets/variables:
+
+```text
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+GOOGLE_REFRESH_TOKEN
+GOOGLE_DRIVE_FOLDER_ID
+PHOTO_GUEST_KEY_HASH
+PHOTO_GALLERY_KEY_HASH
+PHOTO_SESSION_SIGNING_SECRET
+PHOTO_ALLOWED_ORIGINS
+TURNSTILE_SECRET_KEY
+NUXT_PUBLIC_TURNSTILE_SITE_KEY
+```
+
+The two access keys are random values shared only in URL fragments; store
+their lowercase SHA-256 hashes in Cloudflare. Never commit keys, OAuth tokens,
+or QR codes.
+
+For preview deployments, include `https://sabrotto-it.pages.dev` and
+`https://*.sabrotto-it.pages.dev` in `PHOTO_ALLOWED_ORIGINS`. Adding the
+hostname `sabrotto-it.pages.dev` to the Turnstile widget also authorizes its
+Cloudflare-generated preview subdomains.
+
 ## Preview the production build
 
 If you want a Nuxt-managed local preview after the build, run:

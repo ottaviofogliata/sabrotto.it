@@ -1,4 +1,9 @@
 export default defineNuxtConfig({
+  runtimeConfig: {
+    public: {
+      turnstileSiteKey: '1x00000000000000000000AA',
+    },
+  },
   app: {
     head: {
       htmlAttrs: {
@@ -30,6 +35,18 @@ export default defineNuxtConfig({
       headers: {
         'cache-control': 'no-store, no-cache, must-revalidate',
         pragma: 'no-cache',
+      },
+    },
+    '/foto': {
+      headers: {
+        'cache-control': 'no-store, no-cache, must-revalidate',
+        'x-robots-tag': 'noindex, nofollow, noarchive',
+      },
+    },
+    '/gallery': {
+      headers: {
+        'cache-control': 'no-store, no-cache, must-revalidate',
+        'x-robots-tag': 'noindex, nofollow, noarchive',
       },
     },
   },

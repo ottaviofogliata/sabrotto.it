@@ -1552,6 +1552,7 @@ onMounted(() => {
   if ('IntersectionObserver' in window && sectionRef.value) {
     sectionObserver = new IntersectionObserver(
       ([entry]) => {
+        if (!entry) return
         keyboardActive = entry.isIntersecting && entry.intersectionRatio > 0.3
 
         if (!keyboardActive) {

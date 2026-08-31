@@ -11,6 +11,7 @@ node_modules/
 .nitro/
 .data/
 .cache/
+.wrangler/
 dist
 *.local
 

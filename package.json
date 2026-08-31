@@ -8,9 +8,19 @@
     "build": "nuxt generate",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
+    "test": "vitest run",
+    "typecheck": "nuxt typecheck",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "nuxt": "4.4.2"
+    "browser-image-compression": "^2.0.2",
+    "heic-to": "^1.5.2",
+    "nuxt": "4.4.2",
+    "photoswipe": "^5.4.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11",
+    "vue-tsc": "^3.1.5"
   }
 }
