@@ -362,14 +362,14 @@ onBeforeUnmount(() => {
               <div v-if="accessState === 'turnstile'" id="photo-turnstile" class="turnstile-slot" />
             </div>
 
-            <div class="start-actions">
-              <button class="primary-action" type="button" :disabled="accessState !== 'authorized'" @click="openLibrary">
+            <div v-else class="start-actions">
+              <button class="primary-action" type="button" @click="openLibrary">
                 <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 3v11m0-11 4 4m-4-4L8 7M5 13v6h14v-6" />
                 </svg>
                 <span>Carica foto</span>
               </button>
-              <button class="secondary-action" type="button" :disabled="accessState !== 'authorized'" @click="openCamera">
+              <button class="secondary-action" type="button" @click="openCamera">
                 <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M4 7h3l1.5-2h7L17 7h3v12H4z" />
                   <circle cx="12" cy="13" r="4" />
@@ -710,6 +710,8 @@ onBeforeUnmount(() => {
   margin: 1.4rem auto 0;
 }
 
+.start-actions { animation: actions-in 280ms ease both; }
+
 .primary-action,
 .secondary-action {
   min-height: 4rem;
@@ -852,6 +854,7 @@ onBeforeUnmount(() => {
 .visually-hidden { position: fixed; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+@keyframes actions-in { from { transform: translateY(0.4rem); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes seal-in { 0% { transform: scale(0.6) rotate(-8deg); opacity: 0; } 70% { transform: scale(1.06) rotate(2deg); } 100% { transform: scale(1); opacity: 1; } }
 
 @media (min-width: 600px) {
