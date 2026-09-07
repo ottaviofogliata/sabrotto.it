@@ -697,7 +697,7 @@ onBeforeUnmount(() => {
   padding: 0.85rem 1.15rem;
   border-radius: 1rem;
   font-family: var(--font-sans);
-  font-size: 1.05rem;
+  font-size: 1.2rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   cursor: pointer;
