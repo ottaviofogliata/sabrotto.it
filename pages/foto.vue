@@ -28,6 +28,20 @@ const selectionKind = ref<'library' | 'camera'>('library')
 const isUploading = ref(false)
 const isSuccess = ref(false)
 const uploadedCount = ref(0)
+const challengeIdeas = [
+  'Una foto con gli sposi',
+  'Una foto di gruppo del tuo tavolo',
+  'Un brindisi',
+  'Un abbraccio',
+  'Una risata',
+  'Un selfie',
+  'Qualcuno che canta',
+  'Un bacio degli sposi',
+  'Un bacio agli sposi',
+  'La sposa con le sue testimoni',
+  'Lo sposo con i suoi testimoni',
+  'Dai sfogo alla tua creatività',
+]
 
 useSeoMeta({
   title: 'Missione Paparazzi | Ottavio e Sabrina',
@@ -291,145 +305,176 @@ onBeforeUnmount(() => {
 
 <template>
   <main class="paparazzi-page">
-    <div class="paparazzi-page__glow paparazzi-page__glow--one" />
-    <div class="paparazzi-page__glow paparazzi-page__glow--two" />
+    <div class="paper-shell">
+      <aside class="paper-spine" aria-hidden="true">
+        <span class="paper-spine__phrase">Love is the secret ingredient</span>
+        <span class="paper-spine__rule" />
+        <time class="paper-spine__date" datetime="2026-09-12">
+          <span>12</span><span>09</span><span>26</span>
+        </time>
+      </aside>
 
-    <section v-if="accessState === 'denied'" class="access-card" aria-live="polite">
-      <div class="camera-mark" aria-hidden="true">
-        <span class="camera-mark__lens" />
-      </div>
-      <p class="eyebrow">Ottavio &amp; Sabrina</p>
-      <h1>Missione<br><em>Paparazzi</em></h1>
-      <p class="access-card__message">{{ accessMessage }}</p>
-      <a class="text-home" href="/">Torna all’invito</a>
-    </section>
+      <div class="journey-panel">
+        <section v-if="accessState === 'denied'" class="access-card" aria-live="polite">
+          <header class="brand-lockup">
+            <p class="brand-kicker">Fotochallenge</p>
+            <h1>Missione Paparazzi</h1>
+          </header>
+          <div class="status-seal" aria-hidden="true">!</div>
+          <p class="access-card__message">{{ accessMessage }}</p>
+          <a class="text-home" href="/">Torna all’invito</a>
+        </section>
 
-    <section v-else-if="isSuccess" class="mission-card mission-card--success" aria-live="polite">
-      <div class="success-flash" aria-hidden="true">✦</div>
-      <p class="eyebrow">Foto ricevute</p>
-      <h1>Missione<br><em>compiuta!</em></h1>
-      <p>
-        {{ uploadedCount === 1 ? 'La tua foto è pronta per la gallery.' : `Le tue ${uploadedCount} foto sono pronte per la gallery.` }}
-      </p>
-      <button class="primary-action" type="button" @click="startAgain">
-        <span>Carica altre foto</span>
-      </button>
-    </section>
-
-    <section v-else class="mission-card">
-      <header class="mission-header">
-        <div class="camera-mark camera-mark--small" aria-hidden="true">
-          <span class="camera-mark__lens" />
-        </div>
-        <div>
-          <p class="eyebrow">Ottavio &amp; Sabrina</p>
-          <h1>Missione <em>Paparazzi</em></h1>
-        </div>
-      </header>
-
-      <template v-if="!items.length">
-        <p class="mission-copy">
-          Cattura sorrisi, balli e momenti memorabili. Tu scatti, noi li proiettiamo.
-        </p>
-        <div class="start-actions">
-          <button class="primary-action" type="button" :disabled="accessState !== 'authorized'" @click="openLibrary">
-            <span class="action-icon" aria-hidden="true">▧</span>
-            <span>Carica foto</span>
-          </button>
-          <button class="secondary-action" type="button" :disabled="accessState !== 'authorized'" @click="openCamera">
-            <span class="action-icon" aria-hidden="true">◎</span>
-            <span>Scatta una foto</span>
-          </button>
-        </div>
-        <div v-if="accessState !== 'authorized'" class="inline-verification" aria-live="polite">
-          <div v-if="accessState === 'checking'" class="loader" aria-hidden="true" />
-          <p>{{ accessMessage }}</p>
-          <div v-if="accessState === 'turnstile'" id="photo-turnstile" class="turnstile-slot" />
-        </div>
-        <p class="privacy-note">Le foto vengono ottimizzate sul tuo telefono e inviate alla cartella privata degli sposi.</p>
-      </template>
-
-      <template v-else>
-        <div class="review-heading">
-          <div>
-            <p class="eyebrow">Anteprima</p>
-            <h2>{{ selectionKind === 'camera' ? 'Ti piace lo scatto?' : 'La tua selezione' }}</h2>
+        <section v-else-if="isSuccess" class="mission-card mission-card--success" aria-live="polite">
+          <header class="brand-lockup">
+            <p class="brand-kicker">Foto ricevute</p>
+            <h1>Missione compiuta!</h1>
+          </header>
+          <div class="success-seal" aria-hidden="true">
+            <svg viewBox="0 0 64 64" role="presentation">
+              <circle cx="32" cy="32" r="28" />
+              <path d="m19 33 8 8 18-20" />
+            </svg>
           </div>
-          <span v-if="selectionKind === 'library'" class="photo-count">{{ items.length }}/10</span>
-        </div>
-
-        <div v-if="selectionKind === 'camera'" class="camera-preview">
-          <button
-            v-if="items[0]?.previewUrl"
-            class="camera-preview__image"
-            type="button"
-            aria-label="Ingrandisci la foto"
-            @click="openPreview(0)"
-          >
-            <img :src="items[0].previewUrl" alt="Anteprima della foto appena scattata">
+          <p class="mission-copy">
+            {{ uploadedCount === 1 ? 'La tua foto è pronta per la gallery.' : `Le tue ${uploadedCount} foto sono pronte per la gallery.` }}
+          </p>
+          <button class="primary-action" type="button" @click="startAgain">
+            <span>Carica altre foto</span>
           </button>
-          <div v-else class="preparing-card">
-            <div class="loader" aria-hidden="true" />
-            <span>Preparo lo scatto… {{ items[0]?.prepareProgress || 0 }}%</span>
-          </div>
-          <p v-if="items[0]?.error" class="item-error">{{ items[0].error }}</p>
-        </div>
+          <p class="projection-note">La tua missione continua: ogni momento può diventare un ricordo prezioso.</p>
+        </section>
 
-        <div v-else class="photo-grid">
-          <article v-for="(item, index) in items" :key="item.id" class="photo-tile" :class="`photo-tile--${item.status}`">
-            <button
-              v-if="item.previewUrl"
-              class="photo-tile__preview"
-              type="button"
-              :aria-label="`Ingrandisci ${item.sourceName}`"
-              @click="openPreview(index)"
-            >
-              <img :src="item.previewUrl" :alt="`Anteprima di ${item.sourceName}`">
-            </button>
-            <div v-else class="photo-tile__placeholder">
-              <span>{{ item.status === 'preparing' ? `${item.prepareProgress}%` : '!' }}</span>
+        <section v-else class="mission-card" :class="{ 'mission-card--review': items.length }">
+          <header class="brand-lockup">
+            <p class="brand-kicker">Fotochallenge</p>
+            <h1>Missione Paparazzi</h1>
+          </header>
+
+          <template v-if="!items.length">
+            <p class="mission-copy">
+              Contribuisci a rendere indimenticabile questo giorno speciale e crea ricordi preziosi per gli sposi.
+            </p>
+
+            <div class="start-actions">
+              <button class="primary-action" type="button" :disabled="accessState !== 'authorized'" @click="openLibrary">
+                <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3v11m0-11 4 4m-4-4L8 7M5 13v6h14v-6" />
+                </svg>
+                <span>Carica foto</span>
+              </button>
+              <button class="secondary-action" type="button" :disabled="accessState !== 'authorized'" @click="openCamera">
+                <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 7h3l1.5-2h7L17 7h3v12H4z" />
+                  <circle cx="12" cy="13" r="4" />
+                </svg>
+                <span>Scatta una foto</span>
+              </button>
             </div>
-            <button
-              v-if="!isUploading && item.status !== 'uploaded'"
-              class="photo-tile__remove"
-              type="button"
-              :aria-label="`Rimuovi ${item.sourceName}`"
-              @click="removeItem(item.id)"
-            >×</button>
-            <div v-if="item.status === 'uploading'" class="photo-tile__progress">
-              <span :style="{ width: `${item.uploadProgress}%` }" />
+
+            <div v-if="accessState !== 'authorized'" class="inline-verification" aria-live="polite">
+              <div v-if="accessState === 'checking'" class="loader" aria-hidden="true" />
+              <p>{{ accessMessage }}</p>
+              <div v-if="accessState === 'turnstile'" id="photo-turnstile" class="turnstile-slot" />
             </div>
-            <span v-if="item.status === 'uploaded'" class="photo-tile__done" aria-label="Caricata">✓</span>
-            <p v-if="item.error" class="photo-tile__error">{{ item.error }}</p>
-            <button
-              v-if="item.status === 'error' && item.prepared"
-              class="retry-link"
-              type="button"
-              @click="retryItem(item)"
-            >Riprova</button>
-          </article>
-        </div>
 
-        <div v-if="isUploading" class="overall-progress" aria-live="polite">
-          <div><span :style="{ width: `${overallProgress}%` }" /></div>
-          <p>Invio alla gallery… {{ overallProgress }}%</p>
-        </div>
+            <section class="challenge-board" aria-labelledby="challenge-title">
+              <p class="challenge-board__eyebrow">Lasciati ispirare</p>
+              <h2 id="challenge-title">La lista della missione</h2>
+              <ul>
+                <li v-for="idea in challengeIdeas" :key="idea">{{ idea }}</li>
+              </ul>
+            </section>
 
-        <div class="review-actions">
-          <template v-if="selectionKind === 'camera'">
-            <button class="secondary-action" type="button" :disabled="isUploading" @click="openCamera">Scatta di nuovo</button>
-            <button class="primary-action" type="button" :disabled="isPreparing || isUploading || !readyItems.length" @click="uploadAll">OK, carica</button>
+            <p class="projection-note">
+              Le foto verranno proiettate durante la serata, per condividere sorrisi, emozioni e momenti indimenticabili.
+            </p>
+            <p class="privacy-note">Le immagini vengono ottimizzate sul tuo telefono e inviate alla cartella privata degli sposi.</p>
           </template>
+
           <template v-else>
-            <button v-if="items.length < 10" class="secondary-action" type="button" :disabled="isUploading" @click="openLibrary">Aggiungi foto</button>
-            <button class="primary-action" type="button" :disabled="isPreparing || isUploading || !readyItems.length" @click="uploadAll">
-              {{ isUploading ? 'Caricamento…' : `Carica ${readyItems.length} ${readyItems.length === 1 ? 'foto' : 'foto'}` }}
-            </button>
+            <div class="review-heading">
+              <div>
+                <p class="section-kicker">Anteprima</p>
+                <h2>{{ selectionKind === 'camera' ? 'Ti piace lo scatto?' : 'La tua selezione' }}</h2>
+              </div>
+              <span v-if="selectionKind === 'library'" class="photo-count">{{ items.length }}/10</span>
+            </div>
+
+            <div v-if="selectionKind === 'camera'" class="camera-preview">
+              <button
+                v-if="items[0]?.previewUrl"
+                class="camera-preview__image"
+                type="button"
+                aria-label="Ingrandisci la foto"
+                @click="openPreview(0)"
+              >
+                <img :src="items[0].previewUrl" alt="Anteprima della foto appena scattata">
+              </button>
+              <div v-else class="preparing-card">
+                <div class="loader" aria-hidden="true" />
+                <span>Preparo lo scatto… {{ items[0]?.prepareProgress || 0 }}%</span>
+              </div>
+              <p v-if="items[0]?.error" class="item-error">{{ items[0].error }}</p>
+            </div>
+
+            <div v-else class="photo-grid">
+              <article v-for="(item, index) in items" :key="item.id" class="photo-tile" :class="`photo-tile--${item.status}`">
+                <button
+                  v-if="item.previewUrl"
+                  class="photo-tile__preview"
+                  type="button"
+                  :aria-label="`Ingrandisci ${item.sourceName}`"
+                  @click="openPreview(index)"
+                >
+                  <img :src="item.previewUrl" :alt="`Anteprima di ${item.sourceName}`">
+                </button>
+                <div v-else class="photo-tile__placeholder">
+                  <span>{{ item.status === 'preparing' ? `${item.prepareProgress}%` : '!' }}</span>
+                </div>
+                <button
+                  v-if="!isUploading && item.status !== 'uploaded'"
+                  class="photo-tile__remove"
+                  type="button"
+                  :aria-label="`Rimuovi ${item.sourceName}`"
+                  @click="removeItem(item.id)"
+                >×</button>
+                <div v-if="item.status === 'uploading'" class="photo-tile__progress">
+                  <span :style="{ width: `${item.uploadProgress}%` }" />
+                </div>
+                <span v-if="item.status === 'uploaded'" class="photo-tile__done" aria-label="Caricata">✓</span>
+                <p v-if="item.error" class="photo-tile__error">{{ item.error }}</p>
+                <button
+                  v-if="item.status === 'error' && item.prepared"
+                  class="retry-link"
+                  type="button"
+                  @click="retryItem(item)"
+                >Riprova</button>
+              </article>
+            </div>
+
+            <div v-if="isUploading" class="overall-progress" aria-live="polite">
+              <div><span :style="{ width: `${overallProgress}%` }" /></div>
+              <p>Invio alla gallery… {{ overallProgress }}%</p>
+            </div>
+
+            <div class="review-actions">
+              <template v-if="selectionKind === 'camera'">
+                <button class="secondary-action" type="button" :disabled="isUploading" @click="openCamera">Scatta di nuovo</button>
+                <button class="primary-action" type="button" :disabled="isPreparing || isUploading || !readyItems.length" @click="uploadAll">OK, carica</button>
+              </template>
+              <template v-else>
+                <button v-if="items.length < 10" class="secondary-action" type="button" :disabled="isUploading" @click="openLibrary">Aggiungi foto</button>
+                <button class="primary-action" type="button" :disabled="isPreparing || isUploading || !readyItems.length" @click="uploadAll">
+                  {{ isUploading ? 'Caricamento…' : `Carica ${readyItems.length} ${readyItems.length === 1 ? 'foto' : 'foto'}` }}
+                </button>
+              </template>
+            </div>
+            <p v-if="hasErrors && !isUploading" class="review-note">Puoi riprovare le foto non riuscite oppure rimuoverle.</p>
           </template>
-        </div>
-        <p v-if="hasErrors && !isUploading" class="review-note">Puoi riprovare le foto non riuscite oppure rimuoverle.</p>
-      </template>
-    </section>
+        </section>
+      </div>
+    </div>
 
     <input ref="libraryInput" class="visually-hidden" type="file" accept="image/jpeg,image/png,image/heic,image/heif,image/webp,image/avif,.heic,.heif" multiple @change="onLibraryChange">
     <input ref="cameraInput" class="visually-hidden" type="file" accept="image/*" capture="environment" @change="onCameraChange">
@@ -438,18 +483,25 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .paparazzi-page {
+  --photo-olive: #65694a;
+  --photo-olive-dark: #54583d;
+  --photo-olive-deep: #454a34;
+  --photo-ivory: #f0ede2;
+  --photo-paper: #e7e3d9;
+  --photo-ink: #252820;
+  --photo-error: #f4c6b9;
   position: relative;
   isolation: isolate;
   min-height: 100svh;
   min-width: 320px;
   display: grid;
-  place-items: center;
-  overflow: hidden;
-  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
-  color: var(--color-maiolica-blue);
+  place-items: start center;
+  overflow: clip;
+  padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+  color: var(--photo-ivory);
   background:
-    radial-gradient(circle at 15% 12%, rgba(255, 214, 101, 0.42), transparent 26rem),
-    linear-gradient(145deg, #fffaf0 0%, #f3eadc 54%, #e8dfcf 100%);
+    radial-gradient(circle at 14% 8%, rgba(255, 255, 255, 0.5), transparent 26rem),
+    linear-gradient(145deg, #ddd9d2 0%, #cec9c1 100%);
 }
 
 .paparazzi-page::before {
@@ -457,167 +509,265 @@ onBeforeUnmount(() => {
   position: fixed;
   inset: 0;
   z-index: -2;
-  opacity: 0.16;
+  opacity: 0.22;
   background-image:
-    linear-gradient(rgba(36, 56, 77, 0.2) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(36, 56, 77, 0.2) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: linear-gradient(to bottom, black, transparent 75%);
+    repeating-linear-gradient(15deg, rgba(255, 255, 255, 0.16) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(105deg, rgba(55, 54, 47, 0.06) 0 1px, transparent 1px 7px);
 }
 
-.paparazzi-page__glow {
-  position: fixed;
-  z-index: -1;
-  width: 15rem;
-  height: 15rem;
-  border: 1.7rem solid rgba(36, 56, 77, 0.06);
-  border-radius: 50%;
+.paper-shell {
+  width: min(100%, 46rem);
+  min-height: calc(100svh - max(1.5rem, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+  display: grid;
+  grid-template-columns: clamp(3.25rem, 10vw, 5.5rem) minmax(0, 1fr);
+  gap: clamp(0.5rem, 1.7vw, 0.9rem);
+  padding: 0.85rem 0.85rem 0.85rem 0;
+  border: 1px solid rgba(52, 54, 45, 0.1);
+  border-radius: 22rem 22rem 1.4rem 1.4rem;
+  background: var(--photo-paper);
+  box-shadow: 0 1.5rem 4rem rgba(46, 45, 40, 0.24), inset 0 1px rgba(255, 255, 255, 0.75);
 }
 
-.paparazzi-page__glow--one { top: -8rem; right: -6rem; }
-.paparazzi-page__glow--two { bottom: -9rem; left: -7rem; }
+.paper-spine {
+  min-height: 38rem;
+  display: grid;
+  grid-template-rows: auto minmax(4rem, 1fr) auto;
+  justify-items: center;
+  gap: 1rem;
+  padding: clamp(4rem, 12vw, 7rem) 0 1.1rem;
+  color: var(--photo-ink);
+}
+
+.paper-spine__phrase {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--font-serif);
+  font-size: clamp(0.56rem, 1.8vw, 0.73rem);
+  letter-spacing: 0.19em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.paper-spine__rule {
+  width: 1px;
+  min-height: 5rem;
+  background: currentColor;
+}
+
+.paper-spine__date {
+  display: grid;
+  gap: 0.34rem;
+  font-family: var(--font-serif);
+  font-size: clamp(1.15rem, 4vw, 1.65rem);
+  line-height: 1;
+  letter-spacing: 0.08em;
+}
+
+.journey-panel {
+  position: relative;
+  min-width: 0;
+  min-height: calc(100% - clamp(3.25rem, 10vw, 5rem));
+  margin-top: clamp(3.25rem, 10vw, 5rem);
+  overflow: hidden;
+  border-radius: 18rem 18rem 0.72rem 0.72rem;
+  background: var(--photo-olive);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.journey-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.17;
+  background-image:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.18) 0 0.7px, transparent 0.9px),
+    radial-gradient(circle at 75% 65%, rgba(0, 0, 0, 0.16) 0 0.6px, transparent 0.8px);
+  background-size: 5px 5px, 7px 7px;
+}
 
 .access-card,
 .mission-card {
-  width: min(100%, 43rem);
-  padding: clamp(1.35rem, 5vw, 3rem);
-  border: 1px solid rgba(36, 56, 77, 0.17);
-  border-radius: 2rem;
-  background: rgba(255, 250, 240, 0.9);
-  box-shadow: 0 1.5rem 4rem rgba(36, 56, 77, 0.15), inset 0 1px rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(18px);
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 100%;
+  padding: clamp(5rem, 18vw, 8.5rem) clamp(1.15rem, 5.5vw, 3.4rem) clamp(2rem, 6vw, 3.4rem);
 }
 
 .access-card,
-.mission-card--success { text-align: center; }
-
-.mission-header {
+.mission-card--success {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding-bottom: 1.2rem;
-  border-bottom: 1px solid rgba(36, 56, 77, 0.13);
+  justify-content: center;
+  text-align: center;
 }
 
-.eyebrow {
-  margin: 0 0 0.35rem;
-  color: #936d23;
-  font-family: var(--font-sans);
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
+.mission-card--review {
+  padding-top: clamp(4.4rem, 15vw, 7.2rem);
+}
+
+.brand-lockup {
+  text-align: center;
+}
+
+.brand-kicker,
+.section-kicker,
+.challenge-board__eyebrow {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(0.72rem, 2.4vw, 0.93rem);
+  font-weight: 500;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
-h1,
-h2 { margin: 0; font-weight: 600; line-height: 0.95; }
-h1 { font-size: clamp(2.75rem, 10vw, 5rem); }
-.mission-header h1 { font-size: clamp(2rem, 7vw, 3.6rem); }
-h1 em, h2 em { color: #a34d3e; font-weight: 500; }
-h2 { font-size: clamp(2rem, 7vw, 3rem); }
-
-.camera-mark {
-  position: relative;
-  width: 5.1rem;
-  height: 3.8rem;
-  margin: 0 auto 1.4rem;
-  border: 0.25rem solid var(--color-maiolica-blue);
-  border-radius: 1rem;
+.brand-lockup h1 {
+  max-width: 10em;
+  margin: 0.35rem auto 0;
+  font-family: var(--font-script);
+  font-size: clamp(3.25rem, 13vw, 6.25rem);
+  font-weight: 400;
+  line-height: 0.88;
 }
 
-.camera-mark::before {
-  content: "";
-  position: absolute;
-  top: -0.75rem;
-  left: 0.75rem;
-  width: 1.65rem;
-  height: 0.65rem;
-  border-radius: 0.3rem 0.3rem 0 0;
-  background: var(--color-maiolica-blue);
+.mission-card--review .brand-lockup h1 {
+  font-size: clamp(2.75rem, 10vw, 5rem);
 }
 
-.camera-mark__lens {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 2rem;
-  height: 2rem;
-  border: 0.3rem solid var(--color-maiolica-blue);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: inset 0 0 0 0.3rem #ffc83d;
+.review-heading h2,
+.challenge-board h2 {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  line-height: 0.98;
 }
 
-.camera-mark--small { flex: 0 0 auto; width: 3.8rem; height: 2.9rem; margin: 0; border-width: 0.2rem; }
-.camera-mark--small::before { top: -0.55rem; width: 1.2rem; height: 0.45rem; }
-.camera-mark--small .camera-mark__lens { width: 1.5rem; height: 1.5rem; border-width: 0.22rem; box-shadow: inset 0 0 0 0.2rem #ffc83d; }
+.review-heading h2 { font-size: clamp(2rem, 7.5vw, 3.25rem); }
+.challenge-board h2 { font-size: clamp(1.7rem, 6vw, 2.5rem); }
 
 .access-card__message,
 .mission-copy,
-.mission-card--success > p:not(.eyebrow) {
+.projection-note {
   width: min(100%, 31rem);
-  margin: 1.3rem auto;
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  line-height: 1.65;
-  color: var(--color-ink-muted);
+  margin: 1.35rem auto 0;
+  font-family: var(--font-serif);
+  font-size: clamp(1.05rem, 3.7vw, 1.32rem);
+  line-height: 1.35;
+  text-align: center;
+}
+
+.projection-note {
+  margin-top: 2rem;
+  font-style: italic;
+  font-weight: 600;
+}
+
+.status-seal {
+  width: 3.9rem;
+  height: 3.9rem;
+  display: grid;
+  place-items: center;
+  margin: 2rem auto 0.4rem;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-family: var(--font-serif);
+  font-size: 2rem;
 }
 
 .loader {
   width: 2.1rem;
   height: 2.1rem;
   margin: 1.5rem auto 0;
-  border: 0.25rem solid rgba(36, 56, 77, 0.14);
-  border-top-color: #a34d3e;
+  border: 0.2rem solid rgba(240, 237, 226, 0.22);
+  border-top-color: var(--photo-ivory);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
 .turnstile-slot { min-height: 4.5rem; margin-top: 1rem; }
-.inline-verification { margin-top: 1rem; text-align: center; }
+.inline-verification { margin: 1.2rem -0.2rem 0; text-align: center; }
 .inline-verification .loader { margin-top: 0.8rem; }
-.inline-verification p { margin: 0.8rem 0 0; color: var(--color-ink-muted); font-family: var(--font-sans); font-size: 0.82rem; }
-.text-home { color: var(--color-maiolica-blue); font-family: var(--font-sans); font-weight: 700; text-underline-offset: 0.3em; }
+.inline-verification p { margin: 0.8rem 0 0; font-family: var(--font-serif); font-size: 0.95rem; }
+.text-home { color: inherit; font-family: var(--font-serif); font-size: 1.05rem; font-weight: 600; text-underline-offset: 0.3em; }
 
 .start-actions,
-.review-actions { display: grid; gap: 0.85rem; margin-top: 1.5rem; }
+.review-actions { display: grid; gap: 0.75rem; margin-top: 1.45rem; }
 
 .primary-action,
 .secondary-action {
-  min-height: 3.8rem;
+  min-height: 3.65rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  padding: 0.8rem 1.25rem;
+  gap: 0.65rem;
+  padding: 0.75rem 1.15rem;
   border-radius: 999px;
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  font-weight: 800;
+  font-family: var(--font-serif);
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+  transition: transform 160ms ease, background 160ms ease, color 160ms ease, opacity 160ms ease;
 }
 
-.primary-action { border: 1px solid #d99a2b; color: var(--color-maiolica-blue); background: linear-gradient(#ffda67, #ffc83d); box-shadow: 0 0.6rem 1.3rem rgba(147, 109, 35, 0.2); }
-.secondary-action { border: 1px solid rgba(36, 56, 77, 0.24); color: var(--color-maiolica-blue); background: rgba(255, 255, 255, 0.7); }
+.primary-action { border: 1px solid var(--photo-ivory); color: var(--photo-olive-deep); background: var(--photo-ivory); }
+.secondary-action { border: 1px solid rgba(240, 237, 226, 0.72); color: var(--photo-ivory); background: transparent; }
+.primary-action:focus-visible,
+.secondary-action:focus-visible,
+.photo-tile__preview:focus-visible,
+.camera-preview__image:focus-visible,
+.retry-link:focus-visible,
+.text-home:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
 .primary-action:not(:disabled):active,
 .secondary-action:not(:disabled):active { transform: scale(0.98); }
 .primary-action:disabled,
 .secondary-action:disabled { cursor: not-allowed; opacity: 0.5; }
-.action-icon { font-size: 1.35rem; }
+.action-icon { width: 1.3rem; height: 1.3rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
 .privacy-note,
 .review-note {
   margin: 1.2rem auto 0;
-  color: var(--color-ink-muted);
-  font-family: var(--font-sans);
-  font-size: 0.76rem;
-  line-height: 1.55;
+  color: rgba(240, 237, 226, 0.75);
+  font-family: var(--font-serif);
+  font-size: 0.83rem;
+  line-height: 1.45;
   text-align: center;
 }
 
-.review-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin: 1.6rem 0 1rem; }
-.photo-count { padding: 0.35rem 0.65rem; border-radius: 999px; color: var(--color-paper); background: var(--color-maiolica-blue); font-family: var(--font-sans); font-size: 0.75rem; font-weight: 800; }
+.challenge-board {
+  margin-top: 2.2rem;
+  padding: 1.5rem 0 0;
+  border-top: 1px solid rgba(240, 237, 226, 0.35);
+  text-align: center;
+}
+
+.challenge-board ul {
+  width: min(100%, 27rem);
+  margin: 1.1rem auto 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.challenge-board li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-family: var(--font-serif);
+  font-size: clamp(0.98rem, 3.5vw, 1.14rem);
+  line-height: 1.42;
+}
+
+.challenge-board li::before {
+  content: "·";
+  position: absolute;
+  left: 0.2rem;
+  font-weight: 700;
+}
+
+.review-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin: 2rem 0 1rem; padding-top: 1.4rem; border-top: 1px solid rgba(240, 237, 226, 0.35); }
+.photo-count { padding: 0.35rem 0.7rem; border: 1px solid rgba(240, 237, 226, 0.7); border-radius: 999px; color: var(--photo-ivory); font-family: var(--font-serif); font-size: 0.82rem; font-weight: 700; }
 
 .photo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
 .photo-tile { position: relative; min-width: 0; }
@@ -627,50 +777,62 @@ h2 { font-size: clamp(2rem, 7vw, 3rem); }
   width: 100%;
   padding: 0;
   overflow: hidden;
-  border: 0;
-  border-radius: 1rem;
-  background: #dcd4c6;
+  border: 3px solid var(--photo-ivory);
+  border-radius: 0.5rem;
+  background: var(--photo-olive-dark);
 }
 .photo-tile__preview,
 .photo-tile__placeholder { aspect-ratio: 1; }
 .photo-tile img,
 .camera-preview img { width: 100%; height: 100%; object-fit: cover; }
-.photo-tile__placeholder { display: grid; place-items: center; color: var(--color-maiolica-blue); font-family: var(--font-sans); font-weight: 800; }
-.photo-tile__remove { position: absolute; top: 0.4rem; right: 0.4rem; width: 2rem; height: 2rem; border: 0; border-radius: 50%; color: white; background: rgba(18, 24, 31, 0.82); font-size: 1.4rem; line-height: 1; cursor: pointer; }
+.photo-tile__placeholder { display: grid; place-items: center; color: var(--photo-ivory); font-family: var(--font-serif); font-weight: 700; }
+.photo-tile__remove { position: absolute; top: 0.45rem; right: 0.45rem; width: 2rem; height: 2rem; border: 1px solid rgba(69, 74, 52, 0.18); border-radius: 50%; color: var(--photo-olive-deep); background: rgba(240, 237, 226, 0.95); font-size: 1.35rem; line-height: 1; cursor: pointer; }
 .photo-tile__progress { position: absolute; left: 0.5rem; right: 0.5rem; bottom: 0.5rem; height: 0.35rem; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, 0.5); }
-.photo-tile__progress span { display: block; height: 100%; background: #ffc83d; }
-.photo-tile__done { position: absolute; top: 0.45rem; right: 0.45rem; width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 50%; color: white; background: #477a57; font-family: var(--font-sans); font-weight: 900; }
-.photo-tile__error { margin: 0.35rem 0 0; color: #963d32; font-family: var(--font-sans); font-size: 0.68rem; line-height: 1.35; }
-.retry-link { padding: 0; border: 0; color: var(--color-maiolica-blue); background: transparent; font-family: var(--font-sans); font-size: 0.76rem; font-weight: 800; text-decoration: underline; cursor: pointer; }
+.photo-tile__progress span { display: block; height: 100%; background: var(--photo-ivory); }
+.photo-tile__done { position: absolute; top: 0.45rem; right: 0.45rem; width: 2rem; height: 2rem; display: grid; place-items: center; border: 1px solid var(--photo-ivory); border-radius: 50%; color: var(--photo-olive-deep); background: var(--photo-ivory); font-family: var(--font-serif); font-weight: 700; }
+.photo-tile__error { margin: 0.45rem 0 0; color: var(--photo-error); font-family: var(--font-serif); font-size: 0.78rem; line-height: 1.3; }
+.retry-link { padding: 0; border: 0; color: var(--photo-ivory); background: transparent; font-family: var(--font-serif); font-size: 0.86rem; font-weight: 700; text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
 
 .camera-preview__image { aspect-ratio: 4 / 3; max-height: 54svh; cursor: zoom-in; }
-.preparing-card { min-height: 14rem; display: grid; place-content: center; gap: 0.8rem; border-radius: 1rem; background: #e6ded1; color: var(--color-ink-muted); font-family: var(--font-sans); }
+.preparing-card { min-height: 14rem; display: grid; place-content: center; gap: 0.8rem; border: 1px solid rgba(240, 237, 226, 0.4); border-radius: 0.5rem; background: var(--photo-olive-dark); color: var(--photo-ivory); font-family: var(--font-serif); }
 .preparing-card .loader { margin: 0 auto; }
-.item-error { color: #963d32; font-family: var(--font-sans); text-align: center; }
+.item-error { color: var(--photo-error); font-family: var(--font-serif); text-align: center; }
 
 .overall-progress { margin-top: 1rem; }
-.overall-progress > div { height: 0.55rem; overflow: hidden; border-radius: 999px; background: rgba(36, 56, 77, 0.12); }
-.overall-progress span { display: block; height: 100%; background: linear-gradient(90deg, #ffc83d, #a34d3e); transition: width 180ms ease; }
-.overall-progress p { margin: 0.45rem 0 0; font-family: var(--font-sans); font-size: 0.78rem; text-align: center; }
+.overall-progress > div { height: 0.45rem; overflow: hidden; border-radius: 999px; background: rgba(240, 237, 226, 0.2); }
+.overall-progress span { display: block; height: 100%; background: var(--photo-ivory); transition: width 180ms ease; }
+.overall-progress p { margin: 0.5rem 0 0; font-family: var(--font-serif); font-size: 0.88rem; text-align: center; }
 
-.success-flash { color: #d99a2b; font-size: 5rem; animation: flash 900ms ease both; }
+.success-seal { width: 5rem; margin: 1.7rem auto 0.2rem; animation: seal-in 650ms ease both; }
+.success-seal svg { width: 100%; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+.mission-card--success .primary-action { width: min(100%, 22rem); margin-top: 1.6rem; }
 .visually-hidden { position: fixed; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
 @keyframes spin { to { transform: rotate(360deg); } }
-@keyframes flash { 0% { transform: scale(0.3) rotate(-20deg); opacity: 0; } 70% { transform: scale(1.15) rotate(5deg); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes seal-in { 0% { transform: scale(0.6) rotate(-8deg); opacity: 0; } 70% { transform: scale(1.06) rotate(2deg); } 100% { transform: scale(1); opacity: 1; } }
 
 @media (min-width: 580px) {
   .start-actions,
   .review-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .photo-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .challenge-board ul { columns: 2; column-gap: 2rem; }
+  .challenge-board li { break-inside: avoid; }
 }
 
 @media (max-width: 420px) {
-  .paparazzi-page { padding: 0; align-items: stretch; }
+  .paparazzi-page { padding: 0.45rem; }
+  .paper-shell { grid-template-columns: 2.8rem minmax(0, 1fr); gap: 0.35rem; padding: 0.5rem 0.5rem 0.5rem 0; border-radius: 14rem 14rem 0.9rem 0.9rem; }
+  .paper-spine { padding-top: 4.25rem; }
+  .journey-panel { margin-top: 3.25rem; border-radius: 12rem 12rem 0.48rem 0.48rem; }
   .access-card,
-  .mission-card { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; border: 0; border-radius: 0; padding: max(1.35rem, env(safe-area-inset-top)) 1.15rem max(1.35rem, env(safe-area-inset-bottom)); }
-  .mission-card:has(.photo-grid),
-  .mission-card:has(.camera-preview) { justify-content: flex-start; }
+  .mission-card { padding-right: 1rem; padding-left: 1rem; }
+  .mission-card--review { padding-top: 4.1rem; }
+}
+
+@media (max-width: 350px) {
+  .paper-shell { grid-template-columns: 2.35rem minmax(0, 1fr); }
+  .paper-spine__phrase { font-size: 0.5rem; letter-spacing: 0.13em; }
+  .brand-lockup h1 { font-size: 2.9rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
