@@ -28,20 +28,6 @@ const selectionKind = ref<'library' | 'camera'>('library')
 const isUploading = ref(false)
 const isSuccess = ref(false)
 const uploadedCount = ref(0)
-const challengeIdeas = [
-  'Una foto con gli sposi',
-  'Una foto di gruppo del tuo tavolo',
-  'Un brindisi',
-  'Un abbraccio',
-  'Una risata',
-  'Un selfie',
-  'Qualcuno che canta',
-  'Un bacio degli sposi',
-  'Un bacio agli sposi',
-  'La sposa con le sue testimoni',
-  'Lo sposo con i suoi testimoni',
-  'Dai sfogo alla tua creatività',
-]
 
 useSeoMeta({
   title: 'Missione Paparazzi | Ottavio e Sabrina',
@@ -356,20 +342,14 @@ onBeforeUnmount(() => {
               Contribuisci a rendere indimenticabile questo giorno speciale e crea ricordi preziosi per gli sposi.
             </p>
 
-            <div v-if="accessState !== 'authorized'" class="inline-verification" aria-live="polite">
-              <div v-if="accessState === 'checking'" class="loader" aria-hidden="true" />
-              <p>{{ accessMessage }}</p>
-              <div v-if="accessState === 'turnstile'" id="photo-turnstile" class="turnstile-slot" />
-            </div>
-
-            <div v-else class="start-actions">
-              <button class="primary-action" type="button" @click="openLibrary">
+            <div class="start-actions">
+              <button class="primary-action" type="button" :disabled="accessState !== 'authorized'" @click="openLibrary">
                 <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 3v11m0-11 4 4m-4-4L8 7M5 13v6h14v-6" />
                 </svg>
                 <span>Carica foto</span>
               </button>
-              <button class="secondary-action" type="button" @click="openCamera">
+              <button class="secondary-action" type="button" :disabled="accessState !== 'authorized'" @click="openCamera">
                 <svg class="action-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M4 7h3l1.5-2h7L17 7h3v12H4z" />
                   <circle cx="12" cy="13" r="4" />
@@ -378,13 +358,11 @@ onBeforeUnmount(() => {
               </button>
             </div>
 
-            <section class="challenge-board" aria-labelledby="challenge-title">
-              <p class="challenge-board__eyebrow">Lasciati ispirare</p>
-              <h2 id="challenge-title">La lista della missione</h2>
-              <ol>
-                <li v-for="idea in challengeIdeas" :key="idea">{{ idea }}</li>
-              </ol>
-            </section>
+            <div v-if="accessState !== 'authorized'" class="inline-verification" aria-live="polite">
+              <div v-if="accessState === 'checking'" class="loader" aria-hidden="true" />
+              <p>{{ accessMessage }}</p>
+              <div v-if="accessState === 'turnstile'" id="photo-turnstile" class="turnstile-slot" />
+            </div>
 
             <p class="projection-note">
               Le foto verranno proiettate durante la serata, per condividere sorrisi, emozioni e momenti indimenticabili.
@@ -609,8 +587,7 @@ onBeforeUnmount(() => {
 }
 
 .brand-kicker,
-.section-kicker,
-.challenge-board__eyebrow {
+.section-kicker {
   margin: 0;
   font-family: var(--font-serif);
   font-size: 0.72rem;
@@ -633,8 +610,7 @@ onBeforeUnmount(() => {
   font-size: clamp(3.35rem, 14vw, 4.8rem);
 }
 
-.review-heading h2,
-.challenge-board h2 {
+.review-heading h2 {
   margin: 0.15rem 0 0;
   font-family: var(--font-serif);
   font-weight: 500;
@@ -642,7 +618,6 @@ onBeforeUnmount(() => {
 }
 
 .review-heading h2 { font-size: clamp(2rem, 8vw, 2.8rem); }
-.challenge-board h2 { font-size: clamp(1.65rem, 7vw, 2.25rem); }
 
 .access-card__message,
 .mission-copy,
@@ -772,45 +747,6 @@ onBeforeUnmount(() => {
   text-align: center;
 }
 
-.challenge-board {
-  width: min(100%, 28rem);
-  margin: 2.2rem auto 0;
-  padding: 1.2rem 1rem 0.35rem;
-  border: 1px solid rgba(245, 240, 228, 0.18);
-  border-radius: 1.2rem;
-  background: rgba(39, 42, 29, 0.12);
-  text-align: left;
-}
-
-.challenge-board ol {
-  margin: 0.8rem 0 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: mission;
-}
-
-.challenge-board li {
-  display: grid;
-  grid-template-columns: 2rem 1fr;
-  align-items: baseline;
-  gap: 0.2rem;
-  padding: 0.66rem 0;
-  border-top: 1px solid rgba(245, 240, 228, 0.12);
-  font-family: var(--font-serif);
-  font-size: 1rem;
-  line-height: 1.32;
-  counter-increment: mission;
-}
-
-.challenge-board li::before {
-  content: counter(mission, decimal-leading-zero);
-  color: var(--photo-accent);
-  font-family: var(--font-sans);
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-}
-
 .review-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin: 2rem 0 1rem; padding-top: 1.2rem; border-top: 1px solid rgba(245, 240, 228, 0.18); }
 .photo-count { padding: 0.4rem 0.7rem; border-radius: 999px; color: var(--photo-ink); background: var(--photo-accent); font-family: var(--font-sans); font-size: 0.7rem; font-weight: 700; }
 
@@ -875,7 +811,6 @@ onBeforeUnmount(() => {
   .start-actions,
   .review-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .photo-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .challenge-board ol { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1.4rem; }
 }
 
 @media (max-width: 370px) {
