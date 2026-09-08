@@ -35,6 +35,10 @@ useSeoMeta({
   robots: 'noindex, nofollow, noarchive',
 })
 
+useHead({
+  meta: [{ name: 'googlebot', content: 'noindex, nofollow, noarchive, nosnippet, noimageindex' }],
+})
+
 const readyItems = computed(() => items.value.filter(item => item.prepared && item.status !== 'uploaded'))
 const isPreparing = computed(() => items.value.some(item => item.status === 'preparing'))
 const hasErrors = computed(() => items.value.some(item => item.status === 'error'))
