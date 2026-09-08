@@ -90,6 +90,10 @@ not require an access key. The gallery operator key is shared only in a URL
 fragment; store its lowercase SHA-256 hash in Cloudflare. Never commit keys,
 OAuth tokens, or QR codes.
 
+Each guest session can create up to 200 photo uploads in a rolling 60-minute
+window. The limit counts registered upload reservations, including pending
+uploads, and is configured by `MAX_UPLOADS_PER_HOUR` in the photos Pages Function.
+
 For preview deployments, include `https://sabrotto-it.pages.dev` and
 `https://*.sabrotto-it.pages.dev` in `PHOTO_ALLOWED_ORIGINS`. Adding the
 hostname `sabrotto-it.pages.dev` to the Turnstile widget also authorizes its

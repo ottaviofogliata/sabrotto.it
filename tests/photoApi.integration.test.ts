@@ -132,8 +132,9 @@ describe('photo API flow', () => {
     expect(response.status).toBe(403)
   })
 
-  it('creates, verifies, lists and serves a Drive-backed photo', async () => {
+  it('accepts the 200th hourly upload, then verifies, lists and serves the photo', async () => {
     const database = new MockD1()
+    database.usageCount = 199
     const signingSecret = 'photo-session-signing-secret-for-tests'
     const expiresAt = Math.floor(Date.now() / 1000) + 3600
     const guestToken = await __test.createSignedSession('guest', 'guest-session', expiresAt, signingSecret)
@@ -273,9 +274,9 @@ describe('photo API flow', () => {
     expect(database.rows.get('photo-deleted')?.status).toBe('missing')
   })
 
-  it('rejects uploads over the per-session hourly limit', async () => {
+  it('rejects the 201st upload within the per-session hourly window', async () => {
     const database = new MockD1()
-    database.usageCount = 30
+    database.usageCount = 200
     const signingSecret = 'photo-session-signing-secret-for-tests'
     const guestToken = await __test.createSignedSession(
       'guest',
