@@ -367,7 +367,6 @@ onBeforeUnmount(() => {
             <p class="projection-note">
               Le foto verranno proiettate durante la serata, per condividere sorrisi, emozioni e momenti indimenticabili.
             </p>
-            <p class="privacy-note">Le immagini vengono ottimizzate sul tuo telefono e inviate alla cartella privata degli sposi.</p>
           </template>
 
           <template v-else>
@@ -631,15 +630,12 @@ onBeforeUnmount(() => {
 }
 
 .projection-note {
-  margin-top: 1.2rem;
-  padding: 1rem 1.1rem;
-  border-left: 2px solid var(--photo-accent);
-  border-radius: 0 0.8rem 0.8rem 0;
-  background: rgba(39, 42, 29, 0.12);
-  font-size: 1rem;
+  margin-top: 1.5rem;
+  font-size: clamp(1.08rem, 4.4vw, 1.22rem);
   font-style: normal;
   font-weight: 500;
-  text-align: left;
+  line-height: 1.45;
+  text-align: center;
 }
 
 .status-seal {
@@ -736,7 +732,6 @@ onBeforeUnmount(() => {
 }
 .action-icon { width: 1.3rem; height: 1.3rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 
-.privacy-note,
 .review-note {
   width: min(100%, 28rem);
   margin: 1.1rem auto 0;
