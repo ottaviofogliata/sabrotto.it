@@ -43,6 +43,12 @@ export default defineNuxtConfig({
         'x-robots-tag': 'noindex, nofollow, noarchive',
       },
     },
+    '/foto/**': {
+      headers: {
+        'cache-control': 'no-store, no-cache, must-revalidate',
+        'x-robots-tag': 'noindex, nofollow, noarchive',
+      },
+    },
     '/gallery': {
       headers: {
         'cache-control': 'no-store, no-cache, must-revalidate',
